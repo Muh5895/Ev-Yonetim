@@ -7,7 +7,76 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Function to update the time
+            // Varsayılan dil ve tema
+            let currentLanguage = 'tr';
+            let isDarkMode = true;
+
+            // Dil metinleri
+            const texts = {
+                tr: {
+                    temperature: "Yükleniyor...",
+                    time: "Yükleniyor...",
+                    noAlarm: "KURULU ALARM YOK",
+                    menu: "İŞLEMLER MENÜSÜ:",
+                    lightControl: "Işık Yönetim",
+                    camera: "Kamera",
+                    disasters: "Afetler",
+                    settings: "Ayarlar",
+                    selectColor: "Renk Seçim Modu:",
+                    cities: "Türkiye'de Deprem Olan Şehirler:",
+                    darkMode: "Karanlık Mod",
+                    lightMode: "Açık Mod",
+                    language: "Dil"
+                },
+                en: {
+                    temperature: "Loading...",
+                    time: "Loading...",
+                    noAlarm: "NO ALARM SET",
+                    menu: "MENU OPTIONS:",
+                    lightControl: "Light Control",
+                    camera: "Camera",
+                    disasters: "Disasters",
+                    settings: "Settings",
+                    selectColor: "Color Selection Mode:",
+                    cities: "Cities with Earthquakes in Turkey:",
+                    darkMode: "Dark Mode",
+                    lightMode: "Light Mode",
+                    language: "Language"
+                }
+            };
+
+            // Tema değiştirici
+            function toggleTheme() {
+                isDarkMode = !isDarkMode;
+                const body = document.body;
+                body.classList.toggle('bg-black', isDarkMode);
+                body.classList.toggle('bg-white', !isDarkMode);
+                body.classList.toggle('text-white', isDarkMode);
+                body.classList.toggle('text-black', !isDarkMode);
+                document.getElementById('theme-toggle').textContent = isDarkMode
+                    ? texts[currentLanguage].lightMode
+                    : texts[currentLanguage].darkMode;
+            }
+
+            // Dil değiştirme
+            function changeLanguage(language) {
+                currentLanguage = language;
+                document.getElementById('temperature').textContent = texts[language].temperature;
+                document.getElementById('time').textContent = texts[language].time;
+                document.getElementById('no-alarm').textContent = texts[language].noAlarm;
+                document.getElementById('menu-title').textContent = texts[language].menu;
+                document.getElementById('light-control').textContent = texts[language].lightControl;
+                document.getElementById('camera').textContent = texts[language].camera;
+                document.getElementById('disasters').textContent = texts[language].disasters;
+                document.getElementById('settings').textContent = texts[language].settings;
+                document.getElementById('color-label').textContent = texts[language].selectColor;
+                document.getElementById('theme-toggle').textContent = isDarkMode
+                    ? texts[language].lightMode
+                    : texts[language].darkMode;
+                document.getElementById('language-label').textContent = texts[language].language;
+            }
+
+            // Zamanı güncelle
             function updateTime() {
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
@@ -15,96 +84,51 @@
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
             }
-                }
-            }
 
-            // Function to fetch earthquake data
-            async function fetchEarthquakes() {
-                const url = 'https://api.orhanaydogdu.com.tr/deprem/live.php?limit=10';
-
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    const earthquakes = data.result;
-                    const earthquakeList = document.getElementById('earthquake-list');
-                    earthquakeList.innerHTML = '';
-
-                    earthquakes.forEach(earthquake => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${earthquake.lokasyon} - ${earthquake.mag} Magnitude`;
-                        earthquakeList.appendChild(listItem);
-                    });
-
-                    document.getElementById('earthquake-info').classList.remove('hidden');
-                } catch (error) {
-                    console.error('Error fetching earthquake data:', error);
-                }
-            }
-
-            // Update time every second
+            // Başlatma işlemleri
             setInterval(updateTime, 1000);
-            // Fetch weather data on load
-            fetchWeather();
+            changeLanguage('tr'); // Varsayılan dil Türkçe
+            toggleTheme(); // Varsayılan tema karanlık
 
-            // Function to toggle color selection menu
-            document.getElementById('settings-button').addEventListener('click', function() {
-                document.getElementById('color-selection').classList.toggle('hidden');
-            });
-
-            // Function to change background color
-            document.getElementById('color-picker').addEventListener('input', function(event) {
-                const selectedColor = event.target.value;
-                document.getElementById('main-content').style.backgroundColor = selectedColor;
-
-                // If color is white or yellow, set time color to black
-                if (selectedColor === '#ffffff' || selectedColor === '#ffff00') {
-                    document.getElementById('time').style.color = 'black';
-                } else {
-                    document.getElementById('time').style.color = 'white';
-                }
-            });
-
-            // Fetch earthquake data on button click
-            document.getElementById('earthquake-button').addEventListener('click', function() {
-                fetchEarthquakes();
+            // Olay dinleyiciler
+            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+            document.getElementById('language-select').addEventListener('change', function(event) {
+                changeLanguage(event.target.value);
             });
         });
     </script>
 </head>
-<body class="bg-black flex justify-center items-center min-h-screen">
-    <div id="main-menu" class="flex flex-col bg-white rounded-lg overflow-hidden shadow-lg">
+<body class="bg-black text-white flex justify-center items-center min-h-screen">
+    <div id="main-menu" class="flex flex-col bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
         <div id="main-content" class="bg-black text-white p-6 flex flex-col items-center justify-center">
             <div class="text-center">
-                <p id="time" class="text-6xl font-bold">Yükleniyor...</p>
-                <p class="bg-blue-500 text-white px-4 py-2 mt-4 rounded">KURULU ALARM YOK</p>
+                <p id="temperature" class="text-lg"></p>
+                <p id="time" class="text-6xl font-bold"></p>
+                <p id="no-alarm" class="bg-blue-500 text-white px-4 py-2 mt-4 rounded"></p>
             </div>
         </div>
-        <div class="bg-white p-6 flex flex-col justify-center">
-            <h2 class="text-xl font-bold mb-4">İŞLEMLER MENÜSÜ:</h2>
+        <div class="bg-white dark:bg-black p-6 flex flex-col justify-center">
+            <h2 id="menu-title" class="text-xl font-bold mb-4"></h2>
             <div class="space-y-4">
                 <div class="bg-black text-white flex items-center p-4 rounded">
                     <i class="fas fa-lightbulb text-2xl mr-4"></i>
-                    <span class="text-xl">Işık Yönetim</span>
+                    <span id="light-control" class="text-xl"></span>
                 </div>
                 <div class="bg-black text-white flex items-center p-4 rounded">
                     <i class="fas fa-video text-2xl mr-4"></i>
-                    <span class="text-xl">Kamera</span>
+                    <span id="camera" class="text-xl"></span>
                 </div>
-                <div id="earthquake-button" class="bg-black text-white flex items-center p-4 rounded cursor-pointer">
+                <div class="bg-black text-white flex items-center p-4 rounded">
                     <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
-                    <span class="text-xl">Afetler</span>
+                    <span id="disasters" class="text-xl"></span>
                 </div>
-                <div id="settings-button" class="bg-black text-white flex items-center p-4 rounded cursor-pointer">
-                    <i class="fas fa-cog text-2xl mr-4"></i>
-                    <span class="text-xl">Ayarlar</span>
-                </div>
-                <div id="color-selection" class="hidden mt-4">
-                    <label for="color-picker" class="block text-black text-lg mb-2">Renk Seçim Modu:</label>
-                    <input type="color" id="color-picker" class="w-full h-10 p-1 rounded">
-                </div>
-                <div id="earthquake-info" class="hidden mt-4">
-                    <h3 class="text-lg font-bold mb-2">Türkiye'de Deprem Olan Şehirler:</h3>
-                    <ul id="earthquake-list" class="list-disc pl-5"></ul>
+                <div class="flex items-center space-x-4">
+                    <button id="theme-toggle" class="bg-gray-800 text-white px-4 py-2 rounded"></button>
+                    <label id="language-label" class="text-black dark:text-white"></label>
+                    <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
+                        <option value="tr">Türkçe</option>
+                        <option value="en">English</option>
+                    </select>
                 </div>
             </div>
         </div>
