@@ -20,6 +20,7 @@
                     disasters: "Afetler",
                     settings: "Ayarlar",
                     selectLanguage: "Dil Seçimi",
+                    selectTheme: "Tema Seçimi"
                 },
                 en: {
                     temperature: "Loading...",
@@ -31,6 +32,7 @@
                     disasters: "Disasters",
                     settings: "Settings",
                     selectLanguage: "Language Selection",
+                    selectTheme: "Select Theme"
                 },
             };
 
@@ -60,6 +62,18 @@
                 document.getElementById('disasters').textContent = translations[language].disasters;
                 document.getElementById('settings').textContent = translations[language].settings;
                 document.getElementById('language-label').textContent = translations[language].selectLanguage;
+                document.getElementById('theme-label').textContent = translations[language].selectTheme;
+            }
+
+            // Temayı değiştirme işlevi
+            function changeTheme(theme) {
+                if (theme === 'light') {
+                    document.body.classList.remove('bg-black', 'text-white');
+                    document.body.classList.add('bg-white', 'text-black');
+                } else {
+                    document.body.classList.remove('bg-white', 'text-black');
+                    document.body.classList.add('bg-black', 'text-white');
+                }
             }
 
             // Başlangıç işlemleri
@@ -69,6 +83,11 @@
             // Ayarlar menüsündeki dil seçici için olay dinleyici
             document.getElementById('language-select').addEventListener('change', function (event) {
                 translate(event.target.value);
+            });
+
+            // Ayarlar menüsündeki tema seçici için olay dinleyici
+            document.getElementById('theme-select').addEventListener('change', function (event) {
+                changeTheme(event.target.value);
             });
 
             // Ayarlar menüsünü açıp kapatma işlevi
@@ -86,7 +105,6 @@
                 <p id="temperature" class="text-lg"></p>
                 <p id="time-label" class="text-6xl font-bold"></p>
                 <p id="time" class="text-6xl font-bold"></p>
-                <p id="no-alarm" class="bg-blue-500 text-white px-4 py-2 mt-4 rounded"></p>
             </div>
         </div>
         <div class="p-6 flex flex-col justify-center">
@@ -113,6 +131,11 @@
                     <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
                         <option value="tr">Türkçe</option>
                         <option value="en">English</option>
+                    </select>
+                    <label id="theme-label" class="text-white block mt-4"></label>
+                    <select id="theme-select" class="bg-gray-800 text-white px-4 py-2 rounded">
+                        <option value="light">Light Mode</option>
+                        <option value="dark">Dark Mode</option>
                     </select>
                 </div>
             </div>
