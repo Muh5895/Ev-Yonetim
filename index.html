@@ -74,6 +74,22 @@
             });
         });
     </script>
+    <style>
+        /* CSS Animasyonları */
+        .transition-all {
+            transition: all 0.5s ease-in-out;
+        }
+
+        .menu-item:hover {
+            background-color: #333;
+        }
+
+        .menu-icon {
+            border-radius: 50%;
+            padding: 10px;
+            margin-right: 10px;
+        }
+    </style>
 </head>
 <body class="bg-black text-white flex justify-center items-center min-h-screen">
     <div id="main-menu" class="flex flex-col bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
@@ -88,21 +104,22 @@
         <div class="p-6 flex flex-col justify-center">
             <h2 id="menu-title" class="text-xl font-bold mb-4"></h2>
             <div class="space-y-4">
-                <div class="flex items-center p-4 rounded bg-black text-white">
-                    <i class="fas fa-lightbulb text-2xl mr-4"></i>
+                <div class="flex items-center p-4 rounded bg-black text-white menu-item">
+                    <i class="fas fa-lightbulb text-2xl menu-icon"></i>
                     <span id="light-control" class="text-xl"></span>
                 </div>
-                <div class="flex items-center p-4 rounded bg-black text-white">
-                    <i class="fas fa-video text-2xl mr-4"></i>
+                <div class="flex items-center p-4 rounded bg-black text-white menu-item">
+                    <i class="fas fa-video text-2xl menu-icon"></i>
                     <span id="camera" class="text-xl"></span>
                 </div>
-                <div class="flex items-center p-4 rounded bg-black text-white">
-                    <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
+                <div class="flex items-center p-4 rounded bg-black text-white menu-item">
+                    <i class="fas fa-exclamation-triangle text-2xl menu-icon"></i>
                     <span id="disasters" class="text-xl"></span>
                 </div>
-                <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer">
-                    <i class="fas fa-cog text-2xl mr-4"></i>
+                <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer menu-item">
+                    <i class="fas fa-cog text-2xl menu-icon"></i>
                     <span id="settings" class="text-xl"></span>
+                    <i class="fas fa-chevron-down ml-2"></i> <!-- Menü açılır simgesi -->
                 </div>
                 <div id="settings-menu" class="hidden mt-4 space-y-4">
                     <label id="language-label" class="text-white block"></label>
