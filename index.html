@@ -12,27 +12,27 @@
             const translations = {
                 tr: {
                     temperature: "Yükleniyor...",
-                    time: "Saat: ",
+                    timeLabel: "Saat: ",
                     noAlarm: "KURULU ALARM YOK",
-                    menu: "İŞLEMLER MENÜSÜ:",
+                    menuTitle: "İŞLEMLER MENÜSÜ:",
                     lightControl: "Işık Yönetim",
                     camera: "Kamera",
                     disasters: "Afetler",
                     settings: "Ayarlar",
-                    selectLanguage: "Dil Seçimi",
-                    selectTheme: "Tema Seçimi"
+                    languageLabel: "Dil Seçimi",
+                    themeLabel: "Tema Seçimi"
                 },
                 en: {
                     temperature: "Loading...",
-                    time: "Time: ",
+                    timeLabel: "Time: ",
                     noAlarm: "NO ALARM SET",
-                    menu: "MENU OPTIONS:",
+                    menuTitle: "MENU OPTIONS:",
                     lightControl: "Light Control",
                     camera: "Camera",
                     disasters: "Disasters",
                     settings: "Settings",
-                    selectLanguage: "Language Selection",
-                    selectTheme: "Select Theme"
+                    languageLabel: "Language Selection",
+                    themeLabel: "Select Theme"
                 },
             };
 
@@ -54,15 +54,15 @@
 
                 // Çeviriler
                 document.getElementById('temperature').textContent = translations[language].temperature;
-                document.getElementById('time-label').textContent = translations[language].time;
+                document.getElementById('time-label').textContent = translations[language].timeLabel;
                 document.getElementById('no-alarm').textContent = translations[language].noAlarm;
-                document.getElementById('menu-title').textContent = translations[language].menu;
+                document.getElementById('menu-title').textContent = translations[language].menuTitle;
                 document.getElementById('light-control').textContent = translations[language].lightControl;
                 document.getElementById('camera').textContent = translations[language].camera;
                 document.getElementById('disasters').textContent = translations[language].disasters;
                 document.getElementById('settings').textContent = translations[language].settings;
-                document.getElementById('language-label').textContent = translations[language].selectLanguage;
-                document.getElementById('theme-label').textContent = translations[language].selectTheme;
+                document.getElementById('language-label').textContent = translations[language].languageLabel;
+                document.getElementById('theme-label').textContent = translations[language].themeLabel;
             }
 
             // Temayı değiştirme işlevi
