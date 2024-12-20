@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -15,7 +16,7 @@
             const texts = {
                 tr: {
                     temperature: "Yükleniyor...",
-                    time: "Yükleniyor...",
+                    time: "Saat: ",
                     noAlarm: "KURULU ALARM YOK",
                     menu: "İŞLEMLER MENÜSÜ:",
                     lightControl: "Işık Yönetim",
@@ -23,14 +24,13 @@
                     disasters: "Afetler",
                     settings: "Ayarlar",
                     selectColor: "Renk Seçim Modu:",
-                    cities: "Türkiye'de Deprem Olan Şehirler:",
                     darkMode: "Karanlık Mod",
                     lightMode: "Açık Mod",
-                    language: "Dil"
+                    language: "Dil Seçimi"
                 },
                 en: {
                     temperature: "Loading...",
-                    time: "Loading...",
+                    time: "Time: ",
                     noAlarm: "NO ALARM SET",
                     menu: "MENU OPTIONS:",
                     lightControl: "Light Control",
@@ -38,38 +38,34 @@
                     disasters: "Disasters",
                     settings: "Settings",
                     selectColor: "Color Selection Mode:",
-                    cities: "Cities with Earthquakes in Turkey:",
                     darkMode: "Dark Mode",
                     lightMode: "Light Mode",
-                    language: "Language"
+                    language: "Language Selection"
                 }
             };
 
             // Tema değiştirici
             function toggleTheme() {
                 isDarkMode = !isDarkMode;
-                const body = document.body;
-                body.classList.toggle('bg-black', isDarkMode);
-                body.classList.toggle('bg-white', !isDarkMode);
-                body.classList.toggle('text-white', isDarkMode);
-                body.classList.toggle('text-black', !isDarkMode);
+                document.body.classList.toggle('bg-black', isDarkMode);
+                document.body.classList.toggle('bg-white', !isDarkMode);
+                document.body.classList.toggle('text-white', isDarkMode);
+                document.body.classList.toggle('text-black', !isDarkMode);
                 document.getElementById('theme-toggle').textContent = isDarkMode
                     ? texts[currentLanguage].lightMode
                     : texts[currentLanguage].darkMode;
             }
 
-            // Dil değiştirme
+            // Dil değiştirici
             function changeLanguage(language) {
                 currentLanguage = language;
                 document.getElementById('temperature').textContent = texts[language].temperature;
-                document.getElementById('time').textContent = texts[language].time;
                 document.getElementById('no-alarm').textContent = texts[language].noAlarm;
                 document.getElementById('menu-title').textContent = texts[language].menu;
                 document.getElementById('light-control').textContent = texts[language].lightControl;
                 document.getElementById('camera').textContent = texts[language].camera;
                 document.getElementById('disasters').textContent = texts[language].disasters;
                 document.getElementById('settings').textContent = texts[language].settings;
-                document.getElementById('color-label').textContent = texts[language].selectColor;
                 document.getElementById('theme-toggle').textContent = isDarkMode
                     ? texts[language].lightMode
                     : texts[language].darkMode;
@@ -82,7 +78,7 @@
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const seconds = String(now.getSeconds()).padStart(2, '0');
-                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+                document.getElementById('time').textContent = texts[currentLanguage].time + `${hours}:${minutes}:${seconds}`;
             }
 
             // Başlatma işlemleri
@@ -100,31 +96,31 @@
 </head>
 <body class="bg-black text-white flex justify-center items-center min-h-screen">
     <div id="main-menu" class="flex flex-col bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
-        <div id="main-content" class="bg-black text-white p-6 flex flex-col items-center justify-center">
+        <div id="main-content" class="p-6 flex flex-col items-center justify-center">
             <div class="text-center">
                 <p id="temperature" class="text-lg"></p>
                 <p id="time" class="text-6xl font-bold"></p>
                 <p id="no-alarm" class="bg-blue-500 text-white px-4 py-2 mt-4 rounded"></p>
             </div>
         </div>
-        <div class="bg-white dark:bg-black p-6 flex flex-col justify-center">
+        <div class="p-6 flex flex-col justify-center">
             <h2 id="menu-title" class="text-xl font-bold mb-4"></h2>
             <div class="space-y-4">
-                <div class="bg-black text-white flex items-center p-4 rounded">
+                <div class="flex items-center p-4 rounded bg-black text-white">
                     <i class="fas fa-lightbulb text-2xl mr-4"></i>
                     <span id="light-control" class="text-xl"></span>
                 </div>
-                <div class="bg-black text-white flex items-center p-4 rounded">
+                <div class="flex items-center p-4 rounded bg-black text-white">
                     <i class="fas fa-video text-2xl mr-4"></i>
                     <span id="camera" class="text-xl"></span>
                 </div>
-                <div class="bg-black text-white flex items-center p-4 rounded">
+                <div class="flex items-center p-4 rounded bg-black text-white">
                     <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
                     <span id="disasters" class="text-xl"></span>
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-4 mt-4">
                     <button id="theme-toggle" class="bg-gray-800 text-white px-4 py-2 rounded"></button>
-                    <label id="language-label" class="text-black dark:text-white"></label>
+                    <label id="language-label" class="text-white"></label>
                     <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
                         <option value="tr">Türkçe</option>
                         <option value="en">English</option>
