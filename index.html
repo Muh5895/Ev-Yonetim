@@ -1,0 +1,121 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to update the time
+            function updateTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+
+            // Function to fetch weather data
+            async function fetchWeather() {
+                const apiKey = 'YOUR_API_KEY';
+                const city = 'Diyarbakir';
+                const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    const temperature = Math.round(data.main.temp);
+                    document.getElementById('temperature').textContent = `${temperature}° Derece`;
+                } catch (error) {
+                    console.error('Error fetching weather data:', error);
+                }
+            }
+
+            // Function to fetch earthquake data
+            async function fetchEarthquakes() {
+                const url = 'https://api.orhanaydogdu.com.tr/deprem/live.php?limit=10';
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    const earthquakes = data.result;
+                    const earthquakeList = document.getElementById('earthquake-list');
+                    earthquakeList.innerHTML = '';
+
+                    earthquakes.forEach(earthquake => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${earthquake.lokasyon} - ${earthquake.mag} Magnitude`;
+                        earthquakeList.appendChild(listItem);
+                    });
+
+                    document.getElementById('earthquake-info').classList.remove('hidden');
+                } catch (error) {
+                    console.error('Error fetching earthquake data:', error);
+                }
+            }
+
+            // Update time every second
+            setInterval(updateTime, 1000);
+            // Fetch weather data on load
+            fetchWeather();
+
+            // Function to toggle color selection menu
+            document.getElementById('settings-button').addEventListener('click', function() {
+                document.getElementById('color-selection').classList.toggle('hidden');
+            });
+
+            // Function to change background color
+            document.getElementById('color-picker').addEventListener('input', function(event) {
+                document.getElementById('main-content').style.backgroundColor = event.target.value;
+            });
+
+            // Fetch earthquake data on button click
+            document.getElementById('earthquake-button').addEventListener('click', function() {
+                fetchEarthquakes();
+            });
+        });
+    </script>
+</head>
+<body class="bg-black flex justify-center items-center min-h-screen">
+    <div id="main-menu" class="flex flex-col bg-white rounded-lg overflow-hidden shadow-lg">
+        <div id="main-content" class="bg-black text-white p-6 flex flex-col items-center justify-center">
+            <div class="text-center">
+                <p id="temperature" class="text-lg">Yükleniyor...</p>
+                <p id="time" class="text-6xl font-bold">Yükleniyor...</p>
+                <p class="bg-blue-500 text-white px-4 py-2 mt-4 rounded">KURULU ALARM YOK</p>
+                <p class="bg-blue-500 text-white px-4 py-2 mt-2 rounded">0 - BİLDİRİM YOK</p>
+            </div>
+        </div>
+        <div class="bg-white p-6 flex flex-col justify-center">
+            <h2 class="text-xl font-bold mb-4">İŞLEMLER MENÜSÜ:</h2>
+            <div class="space-y-4">
+                <div class="bg-black text-white flex items-center p-4 rounded">
+                    <i class="fas fa-lightbulb text-2xl mr-4"></i>
+                    <span class="text-xl">Işık Yönetim</span>
+                </div>
+                <div class="bg-black text-white flex items-center p-4 rounded">
+                    <i class="fas fa-video text-2xl mr-4"></i>
+                    <span class="text-xl">Kamera</span>
+                </div>
+                <div id="earthquake-button" class="bg-black text-white flex items-center p-4 rounded cursor-pointer">
+                    <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
+                    <span class="text-xl">Afetler</span>
+                </div>
+                <div id="settings-button" class="bg-black text-white flex items-center p-4 rounded cursor-pointer">
+                    <i class="fas fa-cog text-2xl mr-4"></i>
+                    <span class="text-xl">Ayarlar</span>
+                </div>
+                <div id="color-selection" class="hidden mt-4">
+                    <label for="color-picker" class="block text-black text-lg mb-2">Renk Seçim Modu:</label>
+                    <input type="color" id="color-picker" class="w-full h-10 p-1 rounded">
+                </div>
+                <div id="earthquake-info" class="hidden mt-4">
+                    <h3 class="text-lg font-bold mb-2">Türkiye'de Deprem Olan Şehirler:</h3>
+                    <ul id="earthquake-list" class="list-disc pl-5"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
