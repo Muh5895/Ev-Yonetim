@@ -37,6 +37,15 @@
             // Varsayılan dil
             let currentLanguage = "tr";
 
+            // Saat güncelleme işlevi
+            function updateTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+
             // Çeviri işlevi
             function translate(language) {
                 currentLanguage = language;
@@ -53,13 +62,20 @@
                 document.getElementById('language-label').textContent = translations[language].selectLanguage;
             }
 
-            // Dil değiştirme olay dinleyicisi
+            // Başlangıç işlemleri
+            setInterval(updateTime, 1000); // Saat her saniye güncellenir
+            translate(currentLanguage); // Varsayılan dil Türkçe
+
+            // Ayarlar menüsündeki dil seçici için olay dinleyici
             document.getElementById('language-select').addEventListener('change', function (event) {
                 translate(event.target.value);
             });
 
-            // Başlangıç çevirisi
-            translate(currentLanguage);
+            // Ayarlar menüsünü açıp kapatma işlevi
+            document.getElementById('settings-button').addEventListener('click', function () {
+                const settingsMenu = document.getElementById('settings-menu');
+                settingsMenu.classList.toggle('hidden');
+            });
         });
     </script>
 </head>
@@ -69,6 +85,7 @@
             <div class="text-center">
                 <p id="temperature" class="text-lg"></p>
                 <p id="time-label" class="text-6xl font-bold"></p>
+                <p id="time" class="text-6xl font-bold"></p>
                 <p id="no-alarm" class="bg-blue-500 text-white px-4 py-2 mt-4 rounded"></p>
             </div>
         </div>
@@ -87,8 +104,12 @@
                     <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
                     <span id="disasters" class="text-xl"></span>
                 </div>
-                <div class="flex items-center space-x-4 mt-4">
-                    <label id="language-label" class="text-white"></label>
+                <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer">
+                    <i class="fas fa-cog text-2xl mr-4"></i>
+                    <span id="settings" class="text-xl"></span>
+                </div>
+                <div id="settings-menu" class="hidden mt-4 space-y-4">
+                    <label id="language-label" class="text-white block"></label>
                     <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
                         <option value="tr">Türkçe</option>
                         <option value="en">English</option>
