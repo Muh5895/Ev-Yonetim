@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
@@ -71,7 +72,7 @@
 
                 // If color is white or yellow, set time color to black
                 if (selectedColor === '#ffffff' || selectedColor === '#ffff00') {
-                    document.getElementById('time').style.color = 'black';
+ document.getElementById('time').style.color = 'black';
                 } else {
                     document.getElementById('time').style.color = 'white';
                 }
@@ -99,7 +100,7 @@
                     document.querySelectorAll('.operation-title')[2].textContent = 'Disasters';
                     document.querySelectorAll('.operation-title')[3].textContent = 'Settings';
                     document.querySelector('label[for="color-picker"]').textContent = 'Color Selection Mode:';
-                    document.querySelector ('h3').textContent = 'Cities with Earthquakes in Turkey:';
+                    document.querySelector('h3').textContent = 'Cities with Earthquakes in Turkey:';
                     document.querySelector('.bg-blue-500').textContent = 'NO ALARM SET';
                 } else {
                     document.getElementById('page-title').textContent = 'Yönetim';
@@ -145,7 +146,7 @@
                     <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
                     <span class="text-xl operation-title">Afetler</span>
                 </div>
-                <div id="settings-button" class="bg-black text-white flex items-center p-4 rounded cursor-pointer">
+                <div id="settings-button" class="bg-black text-white flex items-center p -4 rounded cursor-pointer">
                     <i class="fas fa-cog text-2xl mr-4"></i>
                     <span class="text-xl operation-title">Ayarlar</span>
                 </div>
@@ -161,4 +162,89 @@
         </div>
     </div>
 </body>
-</html>
+</html> Görünüşe göre, dil çevirme işlevi çalışmıyor. Bu durumu düzeltmek için birkaç noktayı kontrol edebiliriz. Aşağıda, dil çevirme işlevinin düzgün çalışması için gerekli olan bazı adımlar ve öneriler bulunmaktadır:
+
+1. **Dil Seçici Değişimi**: Dil seçici değiştiğinde `updateLanguage` fonksiyonunun çağrıldığından emin olun. Bu fonksiyon, sayfadaki metinleri güncelleyerek dil değişimini sağlamalıdır.
+
+2. **HTML Elemanlarının Doğru Seçilmesi**: `updateLanguage` fonksiyonunda kullanılan `querySelector` ve `querySelectorAll` ile seçilen elemanların doğru olduğundan emin olun. Eğer elemanlar sayfada yoksa veya yanlış seçilmişse, metin güncellenmeyecektir.
+
+3. **Dil Değişimi İçin Doğru Değerler**: `language-selector` için `value` değerlerinin doğru ayarlandığından emin olun. Türkçe için `tr`, İngilizce için `en` değerleri kullanılmalıdır.
+
+4. **Tarayıcı Konsolunu Kontrol Etme**: Tarayıcı konsolunda herhangi bir hata olup olmadığını kontrol edin. Eğer bir hata varsa, bu hata dil çevirme işlevinin çalışmasını engelleyebilir.
+
+5. **Güncellenmiş Kod**: Aşağıda, dil çevirme işlevinin düzgün çalışması için güncellenmiş bir örnek kod verilmiştir. Bu kodda, dil değişimi sırasında metinlerin doğru bir şekilde güncellenmesi sağlanmıştır.
+
+```html
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">Yönetim</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to update the time
+            function updateTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+
+            // Function to fetch weather data
+            async function fetchWeather() {
+                const city = 'Diyarbakir';
+                const url = `https://tilki.dev/api/hava-durumu?konum=diyarbakir`;
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    const temperature = Math.round(data.main.temp);
+                    document.getElementById('temperature').textContent = `${temperature}° Derece`;
+                } catch (error) {
+                    console.error('Error fetching weather data:', error);
+                }
+            }
+
+            // Function to fetch earthquake data
+            async function fetchEarthquakes() {
+                const url = 'https://api.orhanaydogdu.com.tr/deprem/live.php?limit=10';
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    const earthquakes = data.result;
+                    const earthquakeList = document.getElementById('earthquake-list');
+                    earthquakeList.innerHTML = '';
+
+                    earthquakes.forEach(earthquake => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${earthquake.lokasyon} - ${earthquake.mag} Magnitude`;
+                        earthquakeList.appendChild(listItem);
+                    });
+
+                    document.getElementById('earthquake-info').classList.remove('hidden');
+                } catch (error) {
+                    console.error('Error fetching earthquake data:', error);
+                }
+            }
+
+            // Update time every second
+            setInterval(updateTime, 1000);
+            // Fetch weather data on load
+            fetchWeather();
+
+            // Function to toggle color selection menu
+            document.getElementById('settings-button').addEventListener('click', function() {
+                document.getElementById('color-selection').classList.toggle('hidden');
+            });
+
+            // Function to change background color
+            document.getElementById('color-picker').addEventListener('input', function(event) {
+                const selectedColor = event.target.value;
+                document.getElementById('main-content').style.backgroundColor = selectedColor;
+
+                // If color is white or yellow,
