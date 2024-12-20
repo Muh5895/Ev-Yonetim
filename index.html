@@ -12,25 +12,25 @@
             const translations = {
                 tr: {
                     temperature: "Yükleniyor...",
-                    timeLabel: "Saat: ",
+                    time: "Saat: ",
                     noAlarm: "KURULU ALARM YOK",
-                    menuTitle: "İŞLEMLER MENÜSÜ:",
+                    menu: "İŞLEMLER MENÜSÜ:",
                     lightControl: "Işık Yönetim",
                     camera: "Kamera",
                     disasters: "Afetler",
                     settings: "Ayarlar",
-                    languageLabel: "Dil Seçimi"
+                    selectLanguage: "Dil Seçimi",
                 },
                 en: {
                     temperature: "Loading...",
-                    timeLabel: "Time: ",
+                    time: "Time: ",
                     noAlarm: "NO ALARM SET",
-                    menuTitle: "MENU OPTIONS:",
+                    menu: "MENU OPTIONS:",
                     lightControl: "Light Control",
                     camera: "Camera",
                     disasters: "Disasters",
                     settings: "Settings",
-                    languageLabel: "Language Selection"
+                    selectLanguage: "Language Selection",
                 },
             };
 
@@ -52,44 +52,32 @@
 
                 // Çeviriler
                 document.getElementById('temperature').textContent = translations[language].temperature;
-                document.getElementById('time-label').textContent = translations[language].timeLabel;
+                document.getElementById('time-label').textContent = translations[language].time;
                 document.getElementById('no-alarm').textContent = translations[language].noAlarm;
-                document.getElementById('menu-title').textContent = translations[language].menuTitle;
+                document.getElementById('menu-title').textContent = translations[language].menu;
                 document.getElementById('light-control').textContent = translations[language].lightControl;
                 document.getElementById('camera').textContent = translations[language].camera;
                 document.getElementById('disasters').textContent = translations[language].disasters;
                 document.getElementById('settings').textContent = translations[language].settings;
-                document.getElementById('language-label').textContent = translations[language].languageLabel;
+                document.getElementById('language-label').textContent = translations[language].selectLanguage;
             }
 
             // Başlangıç işlemleri
             setInterval(updateTime, 1000); // Saat her saniye güncellenir
             translate(currentLanguage); // Varsayılan dil Türkçe
 
-            // Animasyon ekleme işlevi
-            function animateTimeChange() {
-                const timeElement = document.getElementById('time');
-                timeElement.classList.add('transition-all', 'duration-500', 'ease-in-out'); // Animasyon ekle
-                setTimeout(() => {
-                    timeElement.classList.remove('transition-all', 'duration-500', 'ease-in-out'); // Animasyonu kaldır
-                }, 500);
-            }
-
-            // Saat her saniye güncellendiğinde animasyonu çalıştır
-            setInterval(animateTimeChange, 1000);
-
             // Ayarlar menüsündeki dil seçici için olay dinleyici
             document.getElementById('language-select').addEventListener('change', function (event) {
                 translate(event.target.value);
             });
+
+            // Ayarlar menüsünü açıp kapatma işlevi
+            document.getElementById('settings-button').addEventListener('click', function () {
+                const settingsMenu = document.getElementById('settings-menu');
+                settingsMenu.classList.toggle('hidden');
+            });
         });
     </script>
-    <style>
-        /* CSS Animasyonları */
-        .transition-all {
-            transition: all 0.5s ease-in-out;
-        }
-    </style>
 </head>
 <body class="bg-black text-white flex justify-center items-center min-h-screen">
     <div id="main-menu" class="flex flex-col bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
@@ -97,25 +85,26 @@
             <div class="text-center">
                 <p id="temperature" class="text-lg"></p>
                 <p id="time-label" class="text-6xl font-bold"></p>
-                <p id="time" class="text-6xl font-bold transition-all duration-500 ease-in-out"></p>
+                <p id="time" class="text-6xl font-bold"></p>
+                <p id="no-alarm" class="bg-blue-500 text-white px-4 py-2 mt-4 rounded"></p>
             </div>
         </div>
         <div class="p-6 flex flex-col justify-center">
             <h2 id="menu-title" class="text-xl font-bold mb-4"></h2>
             <div class="space-y-4">
-                <div class="flex items-center p-4 rounded bg-black text-white relative hover:bg-gray-800 cursor-pointer">
+                <div class="flex items-center p-4 rounded bg-black text-white">
                     <i class="fas fa-lightbulb text-2xl mr-4"></i>
                     <span id="light-control" class="text-xl"></span>
                 </div>
-                <div class="flex items-center p-4 rounded bg-black text-white relative hover:bg-gray-800 cursor-pointer">
+                <div class="flex items-center p-4 rounded bg-black text-white">
                     <i class="fas fa-video text-2xl mr-4"></i>
                     <span id="camera" class="text-xl"></span>
                 </div>
-                <div class="flex items-center p-4 rounded bg-black text-white relative hover:bg-gray-800 cursor-pointer">
+                <div class="flex items-center p-4 rounded bg-black text-white">
                     <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
                     <span id="disasters" class="text-xl"></span>
                 </div>
-                <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer relative hover:bg-gray-800">
+                <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer">
                     <i class="fas fa-cog text-2xl mr-4"></i>
                     <span id="settings" class="text-xl"></span>
                 </div>
