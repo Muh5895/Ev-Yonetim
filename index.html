@@ -19,8 +19,7 @@
                     camera: "Kamera",
                     disasters: "Afetler",
                     settings: "Ayarlar",
-                    languageLabel: "Dil Seçimi",
-                    themeLabel: "Tema Seçimi"
+                    languageLabel: "Dil Seçimi"
                 },
                 en: {
                     temperature: "Loading...",
@@ -31,8 +30,7 @@
                     camera: "Camera",
                     disasters: "Disasters",
                     settings: "Settings",
-                    languageLabel: "Language Selection",
-                    themeLabel: "Select Theme"
+                    languageLabel: "Language Selection"
                 },
             };
 
@@ -62,41 +60,36 @@
                 document.getElementById('disasters').textContent = translations[language].disasters;
                 document.getElementById('settings').textContent = translations[language].settings;
                 document.getElementById('language-label').textContent = translations[language].languageLabel;
-                document.getElementById('theme-label').textContent = translations[language].themeLabel;
-            }
-
-            // Temayı değiştirme işlevi
-            function changeTheme(theme) {
-                if (theme === 'light') {
-                    document.body.classList.remove('bg-black', 'text-white');
-                    document.body.classList.add('bg-white', 'text-black');
-                } else {
-                    document.body.classList.remove('bg-white', 'text-black');
-                    document.body.classList.add('bg-black', 'text-white');
-                }
             }
 
             // Başlangıç işlemleri
             setInterval(updateTime, 1000); // Saat her saniye güncellenir
             translate(currentLanguage); // Varsayılan dil Türkçe
 
+            // Animasyon ekleme işlevi
+            function animateTimeChange() {
+                const timeElement = document.getElementById('time');
+                timeElement.classList.add('transition-all', 'duration-500', 'ease-in-out'); // Animasyon ekle
+                setTimeout(() => {
+                    timeElement.classList.remove('transition-all', 'duration-500', 'ease-in-out'); // Animasyonu kaldır
+                }, 500);
+            }
+
+            // Saat her saniye güncellendiğinde animasyonu çalıştır
+            setInterval(animateTimeChange, 1000);
+
             // Ayarlar menüsündeki dil seçici için olay dinleyici
             document.getElementById('language-select').addEventListener('change', function (event) {
                 translate(event.target.value);
             });
-
-            // Ayarlar menüsündeki tema seçici için olay dinleyici
-            document.getElementById('theme-select').addEventListener('change', function (event) {
-                changeTheme(event.target.value);
-            });
-
-            // Ayarlar menüsünü açıp kapatma işlevi
-            document.getElementById('settings-button').addEventListener('click', function () {
-                const settingsMenu = document.getElementById('settings-menu');
-                settingsMenu.classList.toggle('hidden');
-            });
         });
     </script>
+    <style>
+        /* CSS Animasyonları */
+        .transition-all {
+            transition: all 0.5s ease-in-out;
+        }
+    </style>
 </head>
 <body class="bg-black text-white flex justify-center items-center min-h-screen">
     <div id="main-menu" class="flex flex-col bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
@@ -104,7 +97,7 @@
             <div class="text-center">
                 <p id="temperature" class="text-lg"></p>
                 <p id="time-label" class="text-6xl font-bold"></p>
-                <p id="time" class="text-6xl font-bold"></p>
+                <p id="time" class="text-6xl font-bold transition-all duration-500 ease-in-out"></p>
             </div>
         </div>
         <div class="p-6 flex flex-col justify-center">
@@ -131,11 +124,6 @@
                     <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
                         <option value="tr">Türkçe</option>
                         <option value="en">English</option>
-                    </select>
-                    <label id="theme-label" class="text-white block mt-4"></label>
-                    <select id="theme-select" class="bg-gray-800 text-white px-4 py-2 rounded">
-                        <option value="light">Light Mode</option>
-                        <option value="dark">Dark Mode</option>
                     </select>
                 </div>
             </div>
