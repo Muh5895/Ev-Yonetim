@@ -18,6 +18,7 @@
                     disasters: "Afetler",
                     settings: "Ayarlar",
                     selectLanguage: "Dil Seçimi",
+                    selectTheme: "Tema Seçimi"
                 },
                 en: {
                     time: "Time: ",
@@ -27,11 +28,13 @@
                     disasters: "Disasters",
                     settings: "Settings",
                     selectLanguage: "Language Selection",
+                    selectTheme: "Theme Selection"
                 },
             };
 
             // Varsayılan dil
             let currentLanguage = "tr";
+            let currentTheme = "dark";
 
             // Saat güncelleme işlevi
             function updateTime() {
@@ -56,15 +59,30 @@
                 document.getElementById('disasters').textContent = translations[language].disasters;
                 document.getElementById('settings').textContent = translations[language].settings;
                 document.getElementById('language-label').textContent = translations[language].selectLanguage;
+                document.getElementById('theme-label').textContent = translations[language].selectTheme;
+            }
+
+            // Tema değiştirme işlevi
+            function changeTheme(theme) {
+                currentTheme = theme;
+                document.body.className = `bg-${theme} text-white min-h-screen flex justify-center items-center`;
+                const mainMenu = document.getElementById('main-menu');
+                mainMenu.className = `flex flex-col bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg ${theme}`;
             }
 
             // Başlangıç işlemleri
             setInterval(updateTime, 1000); // Saat her saniye güncellenir
             translate(currentLanguage); // Varsayılan dil Türkçe
+            changeTheme(currentTheme); // Varsayılan tema karanlık
 
             // Ayarlar menüsündeki dil seçici için olay dinleyici
             document.getElementById('language-select').addEventListener('change', function (event) {
                 translate(event.target.value);
+            });
+
+            // Tema seçici için olay dinleyici
+            document.getElementById('theme-select').addEventListener('change', function (event) {
+                changeTheme(event.target.value);
             });
 
             // Ayarlar menüsünü açıp kapatma işlevi
@@ -126,6 +144,11 @@
                     <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
                         <option value="tr">Türkçe</option>
                         <option value="en">English</option>
+                    </select>
+                    <label id="theme-label" class="text-white block"></label>
+                    <select id="theme-select" class="bg-gray-800 text-white px-4 py-2 rounded">
+                        <option value="dark">Karanlık</option>
+                        <option value="light">Açık</option>
                     </select>
                 </div>
             </div>
