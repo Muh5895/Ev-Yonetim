@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -116,6 +116,10 @@
                     document.querySelector('.bg-blue-500').textContent = 'KURULU ALARM YOK';
                 }
             }
+
+            // Set default language on load
+            const defaultLanguage = document.getElementById('language-selector').value;
+            updateLanguage(defaultLanguage);
         });
     </script>
 </head>
@@ -146,7 +150,7 @@
                     <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
                     <span class="text-xl operation-title">Afetler</span>
                 </div>
-                <div id="settings-button" class="bg-black text-white flex items-center p -4 rounded cursor-pointer">
+                <div id="settings-button" class="bg-black text-white flex items-center p-4 rounded cursor-pointer">
                     <i class="fas fa-cog text-2xl mr-4"></i>
                     <span class="text-xl operation-title">Ayarlar</span>
                 </div>
@@ -162,4 +166,4 @@
         </div>
     </div>
 </body>
-</html> 
+</html>
