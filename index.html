@@ -15,19 +15,6 @@
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
             }
-
-            // Function to fetch weather data
-            async function fetchWeather() {
-                const city = 'Diyarbakir';
-                const url = `https://tilki.dev/api/hava-durumu?konum=diyarbakir`;
-
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    const sicaklik = Math.round(data.main.temp);
-                    document.getElementById('sicaklik').textContent = `${sicaklik}° Derece`;
-                } catch (error) {
-                    console.error('Error fetching weather data:', error);
                 }
             }
 
@@ -88,7 +75,6 @@
     <div id="main-menu" class="flex flex-col bg-white rounded-lg overflow-hidden shadow-lg">
         <div id="main-content" class="bg-black text-white p-6 flex flex-col items-center justify-center">
             <div class="text-center">
-                <p id="sicaklik" class="text-lg">Yükleniyor...</p>
                 <p id="time" class="text-6xl font-bold">Yükleniyor...</p>
                 <p class="bg-blue-500 text-white px-4 py-2 mt-4 rounded">KURULU ALARM YOK</p>
             </div>
