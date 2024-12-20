@@ -1,130 +1,161 @@
-<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yönetim</title>
+    <title id="page-title">Yönetim</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Varsayılan dil ve tema
-            let currentLanguage = 'tr';
-            let isDarkMode = true;
-
-            // Dil metinleri
-            const texts = {
-                tr: {
-                    temperature: "Yükleniyor...",
-                    time: "Saat: ",
-                    noAlarm: "KURULU ALARM YOK",
-                    menu: "İŞLEMLER MENÜSÜ:",
-                    lightControl: "Işık Yönetim",
-                    camera: "Kamera",
-                    disasters: "Afetler",
-                    settings: "Ayarlar",
-                    selectColor: "Renk Seçim Modu:",
-                    darkMode: "Karanlık Mod",
-                    lightMode: "Açık Mod",
-                    language: "Dil Seçimi"
-                },
-                en: {
-                    temperature: "Loading...",
-                    time: "Time: ",
-                    noAlarm: "NO ALARM SET",
-                    menu: "MENU OPTIONS:",
-                    lightControl: "Light Control",
-                    camera: "Camera",
-                    disasters: "Disasters",
-                    settings: "Settings",
-                    selectColor: "Color Selection Mode:",
-                    darkMode: "Dark Mode",
-                    lightMode: "Light Mode",
-                    language: "Language Selection"
-                }
-            };
-
-            // Tema değiştirici
-            function toggleTheme() {
-                isDarkMode = !isDarkMode;
-                document.body.classList.toggle('bg-black', isDarkMode);
-                document.body.classList.toggle('bg-white', !isDarkMode);
-                document.body.classList.toggle('text-white', isDarkMode);
-                document.body.classList.toggle('text-black', !isDarkMode);
-                document.getElementById('theme-toggle').textContent = isDarkMode
-                    ? texts[currentLanguage].lightMode
-                    : texts[currentLanguage].darkMode;
-            }
-
-            // Dil değiştirici
-            function changeLanguage(language) {
-                currentLanguage = language;
-                document.getElementById('temperature').textContent = texts[language].temperature;
-                document.getElementById('no-alarm').textContent = texts[language].noAlarm;
-                document.getElementById('menu-title').textContent = texts[language].menu;
-                document.getElementById('light-control').textContent = texts[language].lightControl;
-                document.getElementById('camera').textContent = texts[language].camera;
-                document.getElementById('disasters').textContent = texts[language].disasters;
-                document.getElementById('settings').textContent = texts[language].settings;
-                document.getElementById('theme-toggle').textContent = isDarkMode
-                    ? texts[language].lightMode
-                    : texts[language].darkMode;
-                document.getElementById('language-label').textContent = texts[language].language;
-            }
-
-            // Zamanı güncelle
+            // Function to update the time
             function updateTime() {
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const seconds = String(now.getSeconds()).padStart(2, '0');
-                document.getElementById('time').textContent = texts[currentLanguage].time + `${hours}:${minutes}:${seconds}`;
+                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
             }
 
-            // Başlatma işlemleri
-            setInterval(updateTime, 1000);
-            changeLanguage('tr'); // Varsayılan dil Türkçe
-            toggleTheme(); // Varsayılan tema karanlık
+            // Function to fetch weather data
+            async function fetchWeather() {
+                const city = 'Diyarbakir';
+                const url = `https://tilki.dev/api/hava-durumu?konum=diyarbakir`;
 
-            // Olay dinleyiciler
-            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
-            document.getElementById('language-select').addEventListener('change', function(event) {
-                changeLanguage(event.target.value);
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    const temperature = Math.round(data.main.temp);
+                    document.getElementById('temperature').textContent = `${temperature}° Derece`;
+                } catch (error) {
+                    console.error('Error fetching weather data:', error);
+                }
+            }
+
+            // Function to fetch earthquake data
+            async function fetchEarthquakes() {
+                const url = 'https://api.orhanaydogdu.com.tr/deprem/live.php?limit=10';
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    const earthquakes = data.result;
+                    const earthquakeList = document.getElementById('earthquake-list');
+                    earthquakeList.innerHTML = '';
+
+                    earthquakes.forEach(earthquake => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${earthquake.lokasyon} - ${earthquake.mag} Magnitude`;
+                        earthquakeList.appendChild(listItem);
+                    });
+
+                    document.getElementById('earthquake-info').classList.remove('hidden');
+                } catch (error) {
+                    console.error('Error fetching earthquake data:', error);
+                }
+            }
+
+            // Update time every second
+            setInterval(updateTime, 1000);
+            // Fetch weather data on load
+            fetchWeather();
+
+            // Function to toggle color selection menu
+            document.getElementById('settings-button').addEventListener('click', function() {
+                document.getElementById('color-selection').classList.toggle('hidden');
             });
+
+            // Function to change background color
+            document.getElementById('color-picker').addEventListener('input', function(event) {
+                const selectedColor = event.target.value;
+                document.getElementById('main-content').style.backgroundColor = selectedColor;
+
+                // If color is white or yellow, set time color to black
+                if (selectedColor === '#ffffff' || selectedColor === '#ffff00') {
+                    document.getElementById('time').style.color = 'black';
+                } else {
+                    document.getElementById('time').style.color = 'white';
+                }
+            });
+
+            // Fetch earthquake data on button click
+            document.getElementById('earthquake-button').addEventListener('click', function() {
+                fetchEarthquakes();
+            });
+
+            // Language switcher
+            document.getElementById('language-selector').addEventListener('change', function(event) {
+                const selectedLanguage = event.target.value;
+                updateLanguage(selectedLanguage);
+            });
+
+            function updateLanguage(language) {
+                if (language === 'en') {
+                    document.getElementById('page-title').textContent = 'Management';
+                    document.getElementById('temperature').textContent = 'Loading...';
+                    document.getElementById('time').textContent = 'Loading...';
+                    document.querySelector('h2').textContent = 'OPERATIONS MENU:';
+                    document.querySelectorAll('.operation-title')[0].textContent = 'Light Management';
+                    document.querySelectorAll('.operation-title')[1].textContent = 'Camera';
+                    document.querySelectorAll('.operation-title')[2].textContent = 'Disasters';
+                    document.querySelectorAll('.operation-title')[3].textContent = 'Settings';
+                    document.querySelector('label[for="color-picker"]').textContent = 'Color Selection Mode:';
+                    document.querySelector ('h3').textContent = 'Cities with Earthquakes in Turkey:';
+                    document.querySelector('.bg-blue-500').textContent = 'NO ALARM SET';
+                } else {
+                    document.getElementById('page-title').textContent = 'Yönetim';
+                    document.getElementById('temperature').textContent = 'Yükleniyor...';
+                    document.getElementById('time').textContent = 'Yükleniyor...';
+                    document.querySelector('h2').textContent = 'İŞLEMLER MENÜSÜ:';
+                    document.querySelectorAll('.operation-title')[0].textContent = 'Işık Yönetim';
+                    document.querySelectorAll('.operation-title')[1].textContent = 'Kamera';
+                    document.querySelectorAll('.operation-title')[2].textContent = 'Afetler';
+                    document.querySelectorAll('.operation-title')[3].textContent = 'Ayarlar';
+                    document.querySelector('label[for="color-picker"]').textContent = 'Renk Seçim Modu:';
+                    document.querySelector('h3').textContent = 'Türkiye\'de Deprem Olan Şehirler:';
+                    document.querySelector('.bg-blue-500').textContent = 'KURULU ALARM YOK';
+                }
+            }
         });
     </script>
 </head>
-<body class="bg-black text-white flex justify-center items-center min-h-screen">
-    <div id="main-menu" class="flex flex-col bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
-        <div id="main-content" class="p-6 flex flex-col items-center justify-center">
+<body class="bg-black flex justify-center items-center min-h-screen">
+    <div id="main-menu" class="flex flex-col bg-white rounded-lg overflow-hidden shadow-lg">
+        <div id="main-content" class="bg-black text-white p-6 flex flex-col items-center justify-center">
             <div class="text-center">
-                <p id="temperature" class="text-lg"></p>
-                <p id="time" class="text-6xl font-bold"></p>
-                <p id="no-alarm" class="bg-blue-500 text-white px-4 py-2 mt-4 rounded"></p>
+                <p id="time" class="text-6xl font-bold">Yükleniyor...</p>
+                <p class="bg-blue-500 text-white px-4 py-2 mt-4 rounded">KURULU ALARM YOK</p>
             </div>
         </div>
-        <div class="p-6 flex flex-col justify-center">
-            <h2 id="menu-title" class="text-xl font-bold mb-4"></h2>
+        <div class="bg-white p-6 flex flex-col justify-center">
+            <h2 class="text-xl font-bold mb-4">İŞLEMLER MENÜSÜ:</h2>
+            <select id="language-selector" class="mb-4">
+                <option value="tr">Türkçe</option>
+                <option value="en">English</option>
+            </select>
             <div class="space-y-4">
-                <div class="flex items-center p-4 rounded bg-black text-white">
+                <div class="bg-black text-white flex items-center p-4 rounded">
                     <i class="fas fa-lightbulb text-2xl mr-4"></i>
-                    <span id="light-control" class="text-xl"></span>
+                    <span class="text-xl operation-title">Işık Yönetim</span>
                 </div>
-                <div class="flex items-center p-4 rounded bg-black text-white">
+                <div class="bg-black text-white flex items-center p-4 rounded">
                     <i class="fas fa-video text-2xl mr-4"></i>
-                    <span id="camera" class="text-xl"></span>
+                    <span class="text-xl operation-title">Kamera</span>
                 </div>
-                <div class="flex items-center p-4 rounded bg-black text-white">
+                <div id="earthquake-button" class="bg-black text-white flex items-center p-4 rounded cursor-pointer">
                     <i class="fas fa-exclamation-triangle text-2xl mr-4"></i>
-                    <span id="disasters" class="text-xl"></span>
+                    <span class="text-xl operation-title">Afetler</span>
                 </div>
-                <div class="flex items-center space-x-4 mt-4">
-                    <button id="theme-toggle" class="bg-gray-800 text-white px-4 py-2 rounded"></button>
-                    <label id="language-label" class="text-white"></label>
-                    <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
-                        <option value="tr">Türkçe</option>
-                        <option value="en">English</option>
-                    </select>
+                <div id="settings-button" class="bg-black text-white flex items-center p-4 rounded cursor-pointer">
+                    <i class="fas fa-cog text-2xl mr-4"></i>
+                    <span class="text-xl operation-title">Ayarlar</span>
+                </div>
+                <div id="color-selection" class="hidden mt-4">
+                    <label for="color-picker" class="block text-black text-lg mb-2">Renk Seçim Modu:</label>
+                    <input type="color" id="color-picker" class="w-full h-10 p-1 rounded">
+                </div>
+                <div id="earthquake-info" class="hidden mt-4">
+                    <h3 class="text-lg font-bold mb-2">Türkiye'de Deprem Olan Şehirler:</h3>
+                    <ul id="earthquake-list" class="list-disc pl-5"></ul>
                 </div>
             </div>
         </div>
