@@ -12,26 +12,22 @@
                 tr: {
                     time: "Saat: ",
                     menu: "İŞLEMLER MENÜSÜ:",
-                    earthquakes: "Depremler",
-                    settings: "Ayarlar",
-                    rotateWarning: "Telefonu Yatay Moda Alın",
-                    noInternet: "İnternet Bağlantısı Yok",
                     weather: "Hava Durumu",
                     alarm: "Alarm Kur",
                     notes: "Not Al",
-                    news: "Haberler"
+                    news: "Haberler",
+                    earthquakes: "Depremler",
+                    settings: "Ayarlar"
                 },
                 en: {
                     time: "Time: ",
                     menu: "MENU OPTIONS:",
-                    earthquakes: "Earthquakes",
-                    settings: "Settings",
-                    rotateWarning: "Please Rotate Your Device",
-                    noInternet: "No Internet Connection",
                     weather: "Weather",
                     alarm: "Set Alarm",
                     notes: "Take Notes",
-                    news: "News"
+                    news: "News",
+                    earthquakes: "Earthquakes",
+                    settings: "Settings"
                 }
             };
 
@@ -49,16 +45,35 @@
                 currentLanguage = language;
                 document.getElementById('time-label').textContent = translations[language].time;
                 document.getElementById('menu-title').textContent = translations[language].menu;
-                document.getElementById('earthquakes').textContent = translations[language].earthquakes;
-                document.getElementById('settings').textContent = translations[language].settings;
                 document.getElementById('weather').textContent = translations[language].weather;
                 document.getElementById('alarm').textContent = translations[language].alarm;
                 document.getElementById('notes').textContent = translations[language].notes;
                 document.getElementById('news').textContent = translations[language].news;
+                document.getElementById('earthquakes').textContent = translations[language].earthquakes;
+                document.getElementById('settings').textContent = translations[language].settings;
             }
 
-            document.getElementById('language-select').addEventListener('change', function (event) {
-                translate(event.target.value);
+            // Buton Tıklama İşlevleri
+            document.getElementById('weather-button').addEventListener('click', function () {
+                console.log("Hava durumu butonuna tıklandı.");
+            });
+            document.getElementById('alarm-button').addEventListener('click', function () {
+                console.log("Alarm kur butonuna tıklandı.");
+            });
+            document.getElementById('notes-button').addEventListener('click', function () {
+                console.log("Not al butonuna tıklandı.");
+            });
+            document.getElementById('news-button').addEventListener('click', function () {
+                console.log("Haberler butonuna tıklandı.");
+            });
+            document.getElementById('earthquakes-button').addEventListener('click', function () {
+                console.log("Depremler butonuna tıklandı.");
+                alert("AFAD Depremleri sayfasına yönlendiriliyorsunuz.");
+                window.open('https://deprem.afad.gov.tr/');
+            });
+            document.getElementById('settings-button').addEventListener('click', function () {
+                console.log("Ayarlar butonuna tıklandı.");
+                alert("Dil ayarlarını seçin!");
             });
 
             setInterval(updateTime, 1000);
@@ -70,29 +85,31 @@
             flex-direction: row;
             min-height: 100vh;
             overflow: hidden;
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
         }
-        #left-content {
-            flex: 1;
+        #left-content, #right-menu {
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: white;
-            color: black;
-            position: relative;
+            flex-direction: column;
+        }
+        #left-content {
+            flex: 1;
+            border-right: 2px solid gray;
         }
         #right-menu {
             flex: 2;
-            background-color: black;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: start;
             overflow-y: auto;
             padding: 20px;
         }
+        #time {
+            font-size: 3rem;
+            font-weight: bold;
+        }
         .menu-button {
-            background-color: black;
+            background-color: #1f2937;
             color: white;
             padding: 10px 20px;
             border-radius: 8px;
@@ -102,24 +119,20 @@
             width: 80%;
         }
         .menu-button:hover {
-            background-color: gray;
+            background-color: #374151;
         }
     </style>
 </head>
 <body>
     <!-- Sol İçerik (Saat) -->
     <div id="left-content">
-        <div>
-            <p id="time-label" class="text-xl font-bold">Saat: </p>
-            <p id="time" class="text-2xl font-bold"></p>
-        </div>
+        <p id="time-label" class="text-xl font-bold mb-4">Saat: </p>
+        <p id="time"></p>
     </div>
 
     <!-- Sağ Menü (İşlemler) -->
     <div id="right-menu">
-        <h2 id="menu-title" class="text-xl font-bold mb-4">İŞLEMLER MENÜSÜ:</h2>
-
-        <!-- Butonlar -->
+        <h2 id="menu-title" class="text-2xl font-bold mb-4">İŞLEMLER MENÜSÜ:</h2>
         <div class="menu-button" id="weather-button">
             <i class="fas fa-cloud-sun"></i> 
             <span id="weather">Hava Durumu</span>
