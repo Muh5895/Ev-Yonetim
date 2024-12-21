@@ -17,7 +17,8 @@
                     rotateWarning: "Telefonu Yatay Moda Alın",
                     noInternet: "İnternet Bağlantısı Yok",
                     selectLanguage: "Dil Seçimi:",
-                    active: "Aktif"
+                    active: "Aktif",
+                    weather: "Hava Durumu"
                 },
                 en: {
                     time: "Time: ",
@@ -27,12 +28,14 @@
                     rotateWarning: "Please Rotate Your Device",
                     noInternet: "No Internet Connection",
                     selectLanguage: "Select Language:",
-                    active: "Active"
+                    active: "Active",
+                    weather: "Weather"
                 }
             };
 
             let currentLanguage = localStorage.getItem('language') || 'tr';
             let earthquakePopupVisible = false;
+            let weatherPopupVisible = false;
 
             function updateTime() {
                 const now = new Date();
@@ -44,7 +47,7 @@
 
             function translate(language) {
                 currentLanguage = language;
-                localStorage.setItem('language', language); // Dil seçimlerini kaydet
+                localStorage.setItem('language', language);
                 document.getElementById('time-label').textContent = translations[language].time;
                 document.getElementById('menu-title').textContent = translations[language].menu;
                 document.getElementById('earthquakes').textContent = translations[language].earthquakes;
@@ -52,6 +55,7 @@
                 document.getElementById('language-label').textContent = translations[language].selectLanguage;
                 document.getElementById('active-status').textContent = translations[language].active;
                 document.getElementById('rotate-warning').textContent = translations[language].rotateWarning;
+                document.getElementById('weather').textContent = translations[language].weather;
             }
 
             document.getElementById('language-select').addEventListener('change', function (event) {
@@ -62,6 +66,12 @@
                 const popup = document.getElementById('earthquake-popup');
                 earthquakePopupVisible = !earthquakePopupVisible;
                 popup.style.display = earthquakePopupVisible ? 'block' : 'none';
+            });
+
+            document.getElementById('weather-button').addEventListener('click', function () {
+                const popup = document.getElementById('weather-popup');
+                weatherPopupVisible = !weatherPopupVisible;
+                popup.style.display = weatherPopupVisible ? 'block' : 'none';
             });
 
             document.getElementById('settings-button').addEventListener('click', function () {
@@ -97,7 +107,7 @@
             setInterval(updateTime, 1000);
             setInterval(checkInternetConnection, 1000);
             checkOrientation();
-            translate(currentLanguage); // Başlangıçta dil ayarlarını uygula
+            translate(currentLanguage);
 
             window.addEventListener('resize', checkOrientation);
         });
@@ -139,7 +149,7 @@
         .menu-button:hover {
             background-color: gray;
         }
-        #earthquake-popup {
+        #earthquake-popup, #weather-popup {
             display: none;
             position: absolute;
             top: 50%;
@@ -215,6 +225,14 @@
         <div id="earthquake-popup">
             <p>AFAD Deprem Bilgileri:</p>
             <a href="https://deprem.afad.gov.tr/" target="_blank" class="text-blue-400 underline">Siteyi Aç</a>
+        </div>
+        <div id="weather-button" class="menu-button">
+            <i class="fas fa-cloud-sun"></i>
+            <span id="weather">Hava Durumu</span>
+        </div>
+        <div id="weather-popup">
+            <p>Diyarbakır Hava Durumu:</p>
+            <a href="https://weather.com/weather/today/l/37.9075,40.0742" target="_blank" class="text-blue-400 underline">Hava Durumunu Gör</a>
         </div>
         <div id="settings-button" class="menu-button">
             <i class="fas fa-cog"></i>
