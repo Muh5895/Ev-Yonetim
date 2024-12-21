@@ -70,6 +70,9 @@
             margin-bottom: 10px;
             z-index: 200;
         }
+        .alert-info {
+            background-color: #2196F3;
+        }
     </style>
 </head>
 <body>
@@ -88,7 +91,7 @@
         <h2 id="menu-title" class="text-xl font-bold mb-8">İŞLEMLER MENÜSÜ:</h2>
         <div id="weather-button" class="menu-button">
             <i class="fas fa-cloud-sun"></i>
-            <span>Hava Durumu</span>
+            <span id="weather">Hava Durumu</span>
         </div>
         <div id="settings-button" class="menu-button">
             <i class="fas fa-cog"></i>
@@ -119,35 +122,68 @@
     </div>
 
     <!-- İnternet ve Yatay Mod Uyarıları -->
-    <div id="internet-warning" class="alert" style="display: none;">İnternet Bağlantısı Yok</div>
-    <div id="landscape-warning" class="alert" style="display: none;">Yatay Modda Kullanılamaz</div>
+    <div id="internet-warning" class="alert alert-info" style="display: none;">İnternet Bağlantısı Yok</div>
+    <div id="landscape-warning" class="alert alert-info" style="display: none;">Yatay Modda Kullanılamaz</div>
 
     <script>
         let alertsContainer = [];
         let alarms = [];
         let alarmCount = 0;
+        let weatherPopupVisible = false;
 
-        function showAlert(message) {
-            const alert = document.createElement('div');
-            alert.classList.add('alert');
-            alert.textContent = message;
-            document.body.appendChild(alert);
+        const translations = {
+            tr: {
+                time: "Saat: ",
+                menu: "İŞLEMLER MENÜSÜ:",
+                earthquakes: "Depremler",
+                settings: "Ayarlar",
+                weather: "Hava Durumu",
+                diyarbakirWeather: "Diyarbakır Hava Durumu:",
+                alarm: "Alarm"
+            },
+            en: {
+                time: "Time: ",
+                menu: "MENU OPTIONS:",
+                earthquakes: "Earthquakes",
+                settings: "Settings",
+                weather: "Weather",
+                diyarbakirWeather: "Diyarbakır Weather:",
+                alarm: "Alarm"
+            }
+        };
 
-            setTimeout(() => alert.remove(), 3000);
+        let currentLanguage = localStorage.getItem('language') || 'tr';
+
+        // Dil Çevirisi
+        function translate(language) {
+            currentLanguage = language;
+            localStorage.setItem('language', language);
+            document.getElementById('time-label').textContent = translations[language].time;
+            document.getElementById('menu-title').textContent = translations[language].menu;
+            document.getElementById('weather').textContent = translations[language].weather;
         }
 
-        function updateTime() {
+        // Alarm Kurulması
+        function setAlarm() {
+            const days = Array.from(document.getElementById('alarm-days').selectedOptions).map(opt => parseInt(opt.value));
+            const hours = String(document.getElementById('alarm-hours').value).padStart(2, '0');
+            const minutes = String(document.getElementById('alarm-minutes').value).padStart(2, '0');
+            const time = `${hours}:${minutes}`;
+            alarms.push({ days, time });
+            alarmCount++;
+            document.getElementById('alarm-count').textContent = `Kurulan Alarmlar: ${alarmCount}`;
+            showAlert(`Alarm Kuruldu: ${time}`);
+        }
+
+        // Alarm Yaklaşınca Uyarı
+        function checkAlarms() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
-
-            // Alarm Kontrolü
+            const time = `${hours}:${minutes}`;
             alarms.forEach(alarm => {
                 const currentDay = now.getDay();
-                const currentTime = `${hours}:${minutes}`;
-                if (alarm.days.includes(currentDay) && alarm.time === currentTime) {
+                if (alarm.days.includes(currentDay) && alarm.time === time) {
                     showAlert("Alarm Çalıyor!");
                     playAlarm();
                 }
@@ -167,18 +203,48 @@
             showAlert("Alarm Çalıyor! <button onclick='stopAlarm()'>Durdur</button>");
         }
 
-        function setAlarm() {
-            const days = Array.from(document.getElementById('alarm-days').selectedOptions).map(opt => parseInt(opt.value));
-            const hours = String(document.getElementById('alarm-hours').value).padStart(2, '0');
-            const minutes = String(document.getElementById('alarm-minutes').value).padStart(2, '0');
-            const time = `${hours}:${minutes}`;
-            alarms.push({ days, time });
-            alarmCount++;
-            document.getElementById('alarm-count').textContent = `Kurulan Alarmlar: ${alarmCount}`;
-            showAlert(`Alarm Kuruldu: ${time}`);
+        function showAlert(message) {
+            const alert = document.createElement('div');
+            alert.classList.add('alert');
+            alert.innerHTML = message;
+            document.body.appendChild(alert);
+
+            setTimeout(() => alert.remove(), 3000);
+        }
+
+        function stopAlarm() {
+            playAlarm();
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // İnternet ve Yatay Mod Uyarıları
+        function checkInternet() {
+            if (!navigator.onLine) {
+                showAlert('İnternet Bağlantısı Yok');
+            }
+        }
+
+        function checkOrientation() {
+            if (window.innerWidth < window.innerHeight) {
+                document.getElementById('landscape-warning').style.display = 'none';
+            } else {
+                document.getElementById('landscape-warning').style.display = 'block';
+            }
         }
 
         setInterval(updateTime, 1000);
+        setInterval(checkAlarms, 1000);
+        setInterval(checkInternet, 1000);
+        setInterval(checkOrientation, 1000);
+        
+        translate(currentLanguage);
     </script>
 </body>
 </html>
