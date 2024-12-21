@@ -13,6 +13,7 @@
             min-height: 100vh;
             overflow-y: auto;
             margin: 0;
+            background-color: #f4f4f4;
         }
         #left-content {
             flex: 1;
@@ -33,6 +34,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            height: 100%;
         }
         .menu-button {
             background-color: black;
@@ -41,7 +43,6 @@
             border-radius: 8px;
             margin-bottom: 20px;
             cursor: pointer;
-            text-align: center;
             width: 100%;
         }
         .menu-button:hover {
@@ -98,7 +99,13 @@
             margin-top: 20px;
         }
         #time {
-            font-size: 2rem;
+            font-size: 1.5rem;
+        }
+        #time-label {
+            font-size: 1rem;
+        }
+        #alarm-button {
+            width: 100%;
         }
     </style>
 </head>
@@ -124,6 +131,10 @@
             <i class="fas fa-cog"></i>
             <span>Ayarlar</span>
         </div>
+        <div id="earthquakes-button" class="menu-button">
+            <i class="fas fa-earthquake"></i>
+            <span>Depremler</span>
+        </div>
         <div id="alarm-button" class="menu-button">
             <i class="fas fa-bell"></i>
             <span>Alarm</span>
@@ -146,6 +157,12 @@
         Saat: <input id="alarm-hours" type="number" min="0" max="23" value="12" class="border border-gray-500 rounded w-16 p-1">
         Dakika: <input id="alarm-minutes" type="number" min="0" max="59" value="30" class="border border-gray-500 rounded w-16 p-1">
         <button onclick="setAlarm()" class="bg-blue-500 text-white px-4 py-2 rounded">Kur</button>
+    </div>
+
+    <!-- Pop-up: Depremler -->
+    <div id="earthquakes-popup" class="popup">
+        <p>Son Depremler:</p>
+        <ul id="earthquakes-list"></ul>
     </div>
 
     <!-- Uyarı Kutusu -->
@@ -210,15 +227,115 @@
                 setTimeout(() => alertBox.remove(), 3000);
             }
 
+            // Depremleri Gösterme
+            function showEarthquakes() {
+                fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live')
+                    .then(response => response.json())
+                    .then(data => {
+                        const list = document.getElementById('earthquakes-list');
+                        list.innerHTML = '';
+                        data.result.forEach(earthquake => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = `Yer: ${earthquake.place}, Büyüklük: ${earthquake.mag}`;
+                            list.appendChild(listItem);
+                        });
+                    })
+                    .catch(error => showAlert("Depremler alınırken hata oluştu", "error"));
+            }
+
             // Pop-up Açma/Kapama
             document.getElementById('alarm-button').addEventListener('click', function () {
                 const popup = document.getElementById('alarm-popup');
                 popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
             });
 
+            document.getElementById('earthquakes-button').addEventListener('click', function () {
+                const popup = document.getElementById('earthquakes-popup');
+                popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+                if (popup.style.display === 'block') {
+                    showEarthquakes();
+                }
+            });
+
             // Saati Güncelleme
             setInterval(updateTime, 1000);
+
+            // Alarm Çaldığında Ses ve Titreşim
+            function checkAlarms() {
+                const now = new Date();
+                alarms.forEach(alarm => {
+                    const alarmTime = new Date();
+                    alarmTime.setHours(alarm.hours, alarm.minutes, 0, 0);
+                    if (alarmTime.getTime() <= now.getTime()) {
+                        if (!alarm.triggered) {
+                            alarm.triggered = true;
+                            alarmSound.play();
+                            if (navigator.vibrate) {
+                                navigator.vibrate([500, 500, 500]);
+                            }
+                            showAlert("Alarm Çalıyor!", "info");
+                        }
+                    }
+                });
+            }
+
+            // Saatin Üstündeki Alarm Uyarılarını Göster
+            setInterval(checkAlarms, 1000);
+
+            // Diğer Butonlara Tıklama Olayları
+            document.getElementById('settings-button').addEventListener('click', function () {
+                showAlert("Ayarlar Açıldı", "info");
+            });
+
+            // Çeviri Desteği (Türkçe ve İngilizce)
+            const translations = {
+                tr: {
+                    time: "Saat: ",
+                    menu: "İşlem Menüsü",
+                    weather: "Hava Durumu",
+                    earthquakes: "Depremler",
+                    alarm: "Alarm",
+                    settings: "Ayarlar"
+                },
+                en: {
+                    time: "Time: ",
+                    menu: "Menu Options",
+                    weather: "Weather",
+                    earthquakes: "Earthquakes",
+                    alarm: "Alarm",
+                    settings: "Settings"
+                }
+            };
+
+            // Dil Seçimi Yapılınca Çevir
+            function translate(language) {
+                currentLanguage = language;
+                document.getElementById('time-label').textContent = translations[language].time;
+                document.getElementById('menu-title').textContent = translations[language].menu;
+                document.getElementById('weather').textContent = translations[language].weather;
+                document.getElementById('earthquakes').textContent = translations[language].earthquakes;
+                document.getElementById('alarm-button').textContent = translations[language].alarm;
+                document.getElementById('settings-button').textContent = translations[language].settings;
+            }
+
+            // Sayfa Yüklendiğinde Türkçe Olarak Başla
+            translate(currentLanguage);
+
+            // Dil Değişimi İçin Menü
+            const languageSelect = document.createElement('select');
+            const optionTr = document.createElement('option');
+            optionTr.value = 'tr';
+            optionTr.textContent = 'Türkçe';
+            const optionEn = document.createElement('option');
+            optionEn.value = 'en';
+            optionEn.textContent = 'English';
+            languageSelect.appendChild(optionTr);
+            languageSelect.appendChild(optionEn);
+            languageSelect.addEventListener('change', function () {
+                translate(languageSelect.value);
+            });
+            document.getElementById('right-menu').appendChild(languageSelect);
         });
     </script>
 </body>
-    </html>
+</html>
