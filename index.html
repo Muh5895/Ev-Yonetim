@@ -16,8 +16,8 @@
                     settings: "Ayarlar",
                     rotateWarning: "Telefonu Yatay Moda Alın",
                     noInternet: "İnternet Bağlantısı Yok",
-                    internetActive: "İnternet Bağlantısı Aktif",
                     selectLanguage: "Dil Seçimi:",
+                    active: "Aktif"
                 },
                 en: {
                     time: "Time: ",
@@ -26,12 +26,12 @@
                     settings: "Settings",
                     rotateWarning: "Please Rotate Your Device",
                     noInternet: "No Internet Connection",
-                    internetActive: "Internet Connection Active",
                     selectLanguage: "Select Language:",
+                    active: "Active"
                 }
             };
 
-            let currentLanguage = "tr";
+            let currentLanguage = localStorage.getItem('language') || 'tr';
             let earthquakePopupVisible = false;
 
             function updateTime() {
@@ -44,11 +44,13 @@
 
             function translate(language) {
                 currentLanguage = language;
+                localStorage.setItem('language', language); // Dil seçimlerini kaydet
                 document.getElementById('time-label').textContent = translations[language].time;
                 document.getElementById('menu-title').textContent = translations[language].menu;
                 document.getElementById('earthquakes').textContent = translations[language].earthquakes;
                 document.getElementById('settings').textContent = translations[language].settings;
                 document.getElementById('language-label').textContent = translations[language].selectLanguage;
+                document.getElementById('active-status').textContent = translations[language].active;
             }
 
             document.getElementById('language-select').addEventListener('change', function (event) {
@@ -77,21 +79,23 @@
             }
 
             function checkInternetConnection() {
-                const warning = document.getElementById('internet-warning');
+                const internetStatus = document.getElementById('internet-status');
+                const internetWarning = document.getElementById('internet-warning');
                 if (!navigator.onLine) {
-                    warning.innerHTML = '<i class="fas fa-exclamation-triangle"></i> ' + translations[currentLanguage].noInternet;
-                    warning.style.backgroundColor = 'red';
-                    warning.style.display = 'block';
+                    internetWarning.style.display = 'block';
+                    internetStatus.style.backgroundColor = 'red';
+                    internetStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${translations[currentLanguage].noInternet}`;
                 } else {
-                    warning.innerHTML = '<i class="fas fa-check-circle"></i> ' + translations[currentLanguage].internetActive;
-                    warning.style.backgroundColor = 'green';
-                    warning.style.display = 'block';
+                    internetWarning.style.display = 'none';
+                    internetStatus.style.backgroundColor = 'green';
+                    internetStatus.innerHTML = `<i class="fas fa-check-circle"></i> ${translations[currentLanguage].active}`;
                 }
             }
 
             setInterval(updateTime, 1000);
             setInterval(checkInternetConnection, 1000);
             checkOrientation();
+            translate(currentLanguage); // Başlangıçta dil ayarlarını uygula
 
             window.addEventListener('resize', checkOrientation);
         });
@@ -150,10 +154,25 @@
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
+            background-color: red;
             color: white;
             padding: 10px;
             border-radius: 8px;
             display: none;
+        }
+        #internet-status {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            padding: 10px;
+            color: white;
+            display: block;
+            font-size: 16px;
+        }
+        #internet-status i {
+            margin-right: 5px;
         }
         #internet-warning i {
             margin-right: 5px;
@@ -164,7 +183,7 @@
     <!-- Sol İçerik -->
     <div id="left-content">
         <p id="orientation-warning"></p>
-        <p id="internet-warning"></p>
+        <p id="internet-status" style="background-color: green;"></p>
         <div>
             <p id="time-label" class="text-2xl font-bold">Saat: </p>
             <p id="time" class="text-4xl font-bold"></p>
