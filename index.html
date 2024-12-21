@@ -16,8 +16,7 @@
                     camera: "Kamera",
                     earthquakes: "Depremler",
                     settings: "Ayarlar",
-                    selectLanguage: "Dil Seçimi",
-                    selectTheme: "Tema Seçimi"
+                    selectLanguage: "Dil Seçimi"
                 },
                 en: {
                     time: "Time: ",
@@ -26,13 +25,11 @@
                     camera: "Camera",
                     earthquakes: "Earthquakes",
                     settings: "Settings",
-                    selectLanguage: "Language Selection",
-                    selectTheme: "Theme Selection"
+                    selectLanguage: "Language Selection"
                 },
             };
 
             let currentLanguage = "tr";
-            let currentTheme = "dark";
 
             function updateTime() {
                 const now = new Date();
@@ -51,19 +48,6 @@
                 document.getElementById('camera').textContent = translations[language].camera;
                 document.getElementById('earthquakes').textContent = translations[language].earthquakes;
                 document.getElementById('settings').textContent = translations[language].settings;
-                document.getElementById('language-label').textContent = translations[language].selectLanguage;
-                document.getElementById('theme-label').textContent = translations[language].selectTheme;
-            }
-
-            function changeTheme(theme) {
-                currentTheme = theme;
-                if (theme === 'dark') {
-                    document.body.classList.remove('bg-white', 'text-black');
-                    document.body.classList.add('bg-black', 'text-white');
-                } else if (theme === 'light') {
-                    document.body.classList.remove('bg-black', 'text-white');
-                    document.body.classList.add('bg-white', 'text-black');
-                }
             }
 
             async function fetchEarthquakes() {
@@ -85,20 +69,6 @@
 
             setInterval(updateTime, 1000);
             translate(currentLanguage);
-            changeTheme(currentTheme);
-
-            document.getElementById('language-select').addEventListener('change', function (event) {
-                translate(event.target.value);
-            });
-
-            document.getElementById('theme-select').addEventListener('change', function (event) {
-                changeTheme(event.target.value);
-            });
-
-            document.getElementById('settings-button').addEventListener('click', function () {
-                const settingsMenu = document.getElementById('settings-menu');
-                settingsMenu.classList.toggle('hidden');
-            });
 
             document.getElementById('earthquakes-button').addEventListener('click', function () {
                 const earthquakeSection = document.getElementById('earthquake-section');
@@ -124,11 +94,11 @@
             margin-right: 10px;
         }
 
-        /* Horizontal Layout */
+        /* Yatay Mod */
         #main-menu {
             display: flex;
             flex-direction: row;
-            justify-content: space-between;
+            justify-content: flex-start;
             width: 100%;
             max-width: 1200px;
         }
@@ -143,9 +113,22 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
+            position: relative; /* Overlay için */
         }
-        
-        /* Ensure earthquake section is clickable */
+
+        /* Overlay */
+        .menu-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5); /* Yarı saydam katman */
+            z-index: -1; /* Menünün üstünde değil, altında olsun */
+        }
+
+        /* Depremler Butonu */
         #earthquakes-button {
             cursor: pointer;
         }
@@ -185,11 +168,6 @@
                     <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
                         <option value="tr">Türkçe</option>
                         <option value="en">English</option>
-                    </select>
-                    <label id="theme-label" class="text-white block"></label>
-                    <select id="theme-select" class="bg-gray-800 text-white px-4 py-2 rounded">
-                        <option value="dark">Karanlık</option>
-                        <option value="light">Açık</option>
                     </select>
                 </div>
             </div>
