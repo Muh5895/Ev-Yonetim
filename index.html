@@ -9,21 +9,21 @@
     <style>
         body {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             min-height: 100vh;
             overflow: hidden;
         }
         #left-content {
-            flex: 2;
+            flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             background-color: white;
             color: black;
             position: relative;
+            text-align: center;
         }
         #right-menu {
-            flex: 1;
             background-color: black;
             color: white;
             display: flex;
@@ -73,10 +73,25 @@
         .alert-info {
             background-color: #2196F3;
         }
+        #alarm-popup {
+            display: none;
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 200px;
+        }
+        #alarm-count {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
-    <!-- Sol İçerik -->
+    <!-- Sol İçerik (Saat) -->
     <div id="left-content">
         <div>
             <p id="time-label" class="text-2xl font-bold">Saat: </p>
@@ -86,7 +101,7 @@
         </div>
     </div>
 
-    <!-- Sağ Menü -->
+    <!-- Sağ Menü (İşlem Menüsü) -->
     <div id="right-menu">
         <h2 id="menu-title" class="text-xl font-bold mb-8">İŞLEMLER MENÜSÜ:</h2>
         <div id="weather-button" class="menu-button">
@@ -103,7 +118,7 @@
         </div>
     </div>
 
-    <!-- Pop-up -->
+    <!-- Pop-up: Alarm Kurma -->
     <div id="alarm-popup" class="popup">
         <p>Alarm Kur:</p>
         Gün:
@@ -121,33 +136,26 @@
         <button onclick="setAlarm()" class="bg-blue-500 text-white px-4 py-2 rounded">Kur</button>
     </div>
 
-    <!-- İnternet ve Yatay Mod Uyarıları -->
+    <!-- Uyarılar (Alarm Yaklaşma, İnternet Bağlantısı) -->
     <div id="internet-warning" class="alert alert-info" style="display: none;">İnternet Bağlantısı Yok</div>
-    <div id="landscape-warning" class="alert alert-info" style="display: none;">Yatay Modda Kullanılamaz</div>
+    <div id="alarm-warning" class="alert alert-info" style="display: none;">Alarm Yaklaşıyor!</div>
 
     <script>
         let alertsContainer = [];
         let alarms = [];
         let alarmCount = 0;
-        let weatherPopupVisible = false;
-
+        let alarmPlaying = false;
         const translations = {
             tr: {
                 time: "Saat: ",
                 menu: "İŞLEMLER MENÜSÜ:",
-                earthquakes: "Depremler",
-                settings: "Ayarlar",
                 weather: "Hava Durumu",
-                diyarbakirWeather: "Diyarbakır Hava Durumu:",
                 alarm: "Alarm"
             },
             en: {
                 time: "Time: ",
                 menu: "MENU OPTIONS:",
-                earthquakes: "Earthquakes",
-                settings: "Settings",
                 weather: "Weather",
-                diyarbakirWeather: "Diyarbakır Weather:",
                 alarm: "Alarm"
             }
         };
@@ -184,38 +192,49 @@
             alarms.forEach(alarm => {
                 const currentDay = now.getDay();
                 if (alarm.days.includes(currentDay) && alarm.time === time) {
-                    showAlert("Alarm Çalıyor!");
-                    playAlarm();
+                    document.getElementById('alarm-warning').style.display = 'block';
+                    if (!alarmPlaying) {
+                        playAlarm();
+                    }
                 }
             });
         }
 
         function playAlarm() {
+            alarmPlaying = true;
             const audio = new Audio("https://www.soundjay.com/button/beep-07.wav");
             audio.loop = true;
             audio.play();
-
-            const stopAlarm = () => {
-                audio.pause();
-                audio.currentTime = 0;
-            };
-
             showAlert("Alarm Çalıyor! <button onclick='stopAlarm()'>Durdur</button>");
         }
 
+        function stopAlarm() {
+            alarmPlaying = false;
+            const audio = new Audio("https://www.soundjay.com/button/beep-07.wav");
+            audio.pause();
+            audio.currentTime = 0;
+            showAlert("Alarm Durduruldu");
+        }
+
+        // Uyarı Gösterme
         function showAlert(message) {
             const alert = document.createElement('div');
             alert.classList.add('alert');
             alert.innerHTML = message;
             document.body.appendChild(alert);
-
             setTimeout(() => alert.remove(), 3000);
         }
 
-        function stopAlarm() {
-            playAlarm();
+        // İnternet Bağlantısını Kontrol Et
+        function checkInternet() {
+            if (!navigator.onLine) {
+                document.getElementById('internet-warning').style.display = 'block';
+            } else {
+                document.getElementById('internet-warning').style.display = 'none';
+            }
         }
 
+        // Saat Güncelleme
         function updateTime() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
@@ -224,27 +243,9 @@
             document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
         }
 
-        // İnternet ve Yatay Mod Uyarıları
-        function checkInternet() {
-            if (!navigator.onLine) {
-                showAlert('İnternet Bağlantısı Yok');
-            }
-        }
-
-        function checkOrientation() {
-            if (window.innerWidth < window.innerHeight) {
-                document.getElementById('landscape-warning').style.display = 'none';
-            } else {
-                document.getElementById('landscape-warning').style.display = 'block';
-            }
-        }
-
         setInterval(updateTime, 1000);
-        setInterval(checkAlarms, 1000);
-        setInterval(checkInternet, 1000);
-        setInterval(checkOrientation, 1000);
-        
-        translate(currentLanguage);
+        setInterval(checkAlarms, 60000); // Alarm kontrolünü her dakika yap
+        checkInternet();
     </script>
 </body>
 </html>
