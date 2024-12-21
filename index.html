@@ -51,6 +51,7 @@
                 document.getElementById('settings').textContent = translations[language].settings;
                 document.getElementById('language-label').textContent = translations[language].selectLanguage;
                 document.getElementById('active-status').textContent = translations[language].active;
+                document.getElementById('rotate-warning').textContent = translations[language].rotateWarning;
             }
 
             document.getElementById('language-select').addEventListener('change', function (event) {
@@ -71,7 +72,6 @@
             function checkOrientation() {
                 const warning = document.getElementById('orientation-warning');
                 if (window.innerWidth < window.innerHeight) {
-                    warning.textContent = translations[currentLanguage].rotateWarning;
                     warning.style.display = 'block';
                 } else {
                     warning.style.display = 'none';
@@ -85,10 +85,12 @@
                     internetWarning.style.display = 'block';
                     internetStatus.style.backgroundColor = 'red';
                     internetStatus.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${translations[currentLanguage].noInternet}`;
+                    document.getElementById('active-status').style.display = 'none';
                 } else {
                     internetWarning.style.display = 'none';
                     internetStatus.style.backgroundColor = 'green';
                     internetStatus.innerHTML = `<i class="fas fa-check-circle"></i> ${translations[currentLanguage].active}`;
+                    document.getElementById('active-status').style.display = 'block';
                 }
             }
 
@@ -177,16 +179,29 @@
         #internet-warning i {
             margin-right: 5px;
         }
+        #active-status {
+            margin-top: 10px;
+            background-color: green;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <!-- Sol İçerik -->
     <div id="left-content">
-        <p id="orientation-warning"></p>
-        <p id="internet-status" style="background-color: green;"></p>
+        <div id="orientation-warning"></div>
+        <div id="internet-status" style="background-color: green;"></div>
         <div>
             <p id="time-label" class="text-2xl font-bold">Saat: </p>
             <p id="time" class="text-4xl font-bold"></p>
+            <div id="active-status">
+                <i class="fas fa-check-circle"></i> Aktif
+            </div>
         </div>
     </div>
 
