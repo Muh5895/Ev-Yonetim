@@ -123,17 +123,43 @@
             padding: 10px;
             margin-right: 10px;
         }
+
+        /* Horizontal Layout */
+        #main-menu {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        #main-content {
+            width: 60%;
+            padding: 20px;
+        }
+
+        .menu-container {
+            width: 30%;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Ensure earthquake section is clickable */
+        #earthquakes-button {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="bg-black text-white flex justify-center items-center min-h-screen">
-    <div id="main-menu" class="flex flex-col bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
+    <div id="main-menu" class="bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
         <div id="main-content" class="p-6 flex flex-col items-center justify-center">
             <div class="text-center">
                 <p id="time-label" class="text-6xl font-bold"></p>
                 <p id="time" class="text-6xl font-bold"></p>
             </div>
         </div>
-        <div class="p-6 flex flex-col justify-center">
+        <div class="menu-container">
             <h2 id="menu-title" class="text-xl font-bold mb-4"></h2>
             <div class="space-y-4">
                 <div class="flex items-center p-4 rounded bg-black text-white menu-item">
