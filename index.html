@@ -14,7 +14,7 @@
                     menu: "İŞLEMLER MENÜSÜ:",
                     lightControl: "Işık Yönetim",
                     camera: "Kamera",
-                    disasters: "Afetler",
+                    disasters: "Depremler",
                     settings: "Ayarlar",
                     selectLanguage: "Dil Seçimi",
                     selectTheme: "Tema Seçimi"
@@ -24,7 +24,7 @@
                     menu: "MENU OPTIONS:",
                     lightControl: "Light Control",
                     camera: "Camera",
-                    disasters: "Disasters",
+                    disasters: "Earthquakes",
                     settings: "Settings",
                     selectLanguage: "Language Selection",
                     selectTheme: "Theme Selection"
@@ -57,15 +57,50 @@
             function changeTheme(theme) {
                 currentTheme = theme;
                 const body = document.body;
-
                 if (theme === 'dark') {
                     body.classList.remove('bg-white', 'text-black');
                     body.classList.add('bg-black', 'text-white');
                 } else if (theme === 'light') {
                     body.classList.remove('bg-black', 'text-white');
                     body.classList.add('bg-white');
-                    body.style.color = 'white'; // Açık tema için metin rengi beyaz
+                    body.style.color = 'black';
                 }
+            }
+
+            function fetchEarthquakes() {
+                const earthquakeContainer = document.createElement('div');
+                earthquakeContainer.className = 'p-4 bg-gray-800 text-white rounded mt-4';
+                earthquakeContainer.id = 'earthquake-container';
+                document.body.appendChild(earthquakeContainer);
+
+                fetch('https://deprem.afad.gov.tr/apiv2/event/filter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        start: "2023-01-01",
+                        end: new Date().toISOString().slice(0, 10),
+                        minmag: 2.0,
+                        limit: 10
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        earthquakeContainer.innerHTML = '<h2 class="text-2xl font-bold mb-4">Son Depremler</h2>';
+                        data.forEach(eq => {
+                            earthquakeContainer.innerHTML += `
+                                <div class="p-2 border-b border-gray-600">
+                                    <p><strong>Bölge:</strong> ${eq.location}</p>
+                                    <p><strong>Büyüklük:</strong> ${eq.magnitude}</p>
+                                    <p><strong>Tarih:</strong> ${new Date(eq.date).toLocaleString()}</p>
+                                </div>
+                            `;
+                        });
+                    })
+                    .catch(error => {
+                        earthquakeContainer.innerHTML = `<p class="text-red-500">Deprem verileri alınamadı: ${error.message}</p>`;
+                    });
             }
 
             setInterval(updateTime, 1000);
@@ -80,10 +115,7 @@
                 changeTheme(event.target.value);
             });
 
-            document.getElementById('settings-button').addEventListener('click', function () {
-                const settingsMenu = document.getElementById('settings-menu');
-                settingsMenu.classList.toggle('hidden');
-            });
+            document.getElementById('disasters-button').addEventListener('click', fetchEarthquakes);
         });
     </script>
     <style>
@@ -121,7 +153,7 @@
                     <i class="fas fa-video text-2xl menu-icon"></i>
                     <span id="camera" class="text-xl"></span>
                 </div>
-                <div class="flex items-center p-4 rounded bg-black text-white menu-item">
+                <div id="disasters-button" class="flex items-center p-4 rounded bg-black text-white menu-item cursor-pointer">
                     <i class="fas fa-exclamation-triangle text-2xl menu-icon"></i>
                     <span id="disasters" class="text-xl"></span>
                 </div>
