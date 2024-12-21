@@ -49,8 +49,13 @@
                 document.getElementById('settings-popup-label').textContent = translations[language].chooseLanguage;
             }
 
-            function togglePopup(popupId) {
+            function togglePopup(buttonId, popupId) {
+                const button = document.getElementById(buttonId);
                 const popup = document.getElementById(popupId);
+                const rect = button.getBoundingClientRect();
+
+                popup.style.top = `${rect.top + window.scrollY + 10}px`;
+                popup.style.left = `${rect.right + 10}px`;
                 popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
             }
 
@@ -67,6 +72,10 @@
                 document.getElementById('internet-popup-text').textContent = hasInternet
                     ? translations[currentLanguage].internetActive
                     : translations[currentLanguage].internetInactive;
+
+                document.getElementById('orientation-popup-text').textContent = isLandscape
+                    ? ''
+                    : translations[currentLanguage].orientationWarning;
             }
 
             document.getElementById('language-select').addEventListener('change', function (event) {
@@ -74,15 +83,15 @@
             });
 
             document.getElementById('weather-button').addEventListener('click', function () {
-                togglePopup('weather-popup');
+                togglePopup('weather-button', 'weather-popup');
             });
 
             document.getElementById('earthquake-button').addEventListener('click', function () {
-                togglePopup('earthquake-popup');
+                togglePopup('earthquake-button', 'earthquake-popup');
             });
 
             document.getElementById('settings-button').addEventListener('click', function () {
-                togglePopup('settings-popup');
+                togglePopup('settings-button', 'settings-popup');
             });
 
             window.addEventListener('resize', checkOrientationAndInternet);
@@ -138,23 +147,22 @@
         .popup {
             display: none;
             position: absolute;
-            top: 10%;
-            left: 50%;
-            transform: translate(-50%, 0);
             background-color: gray;
             color: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .popup-overlay {
-            display: none;
-            position: absolute;
+        .notification-popup {
+            position: fixed;
             top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            margin: 5px 0;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -190,10 +198,10 @@
             <option value="en">English</option>
         </select>
     </div>
-    <div id="orientation-popup" class="popup" style="background-color: red; top: 5%;">
+    <div id="orientation-popup" class="notification-popup">
         <p id="orientation-popup-text"></p>
     </div>
-    <div id="internet-popup" class="popup" style="background-color: orange; top: 15%;">
+    <div id="internet-popup" class="notification-popup">
         <p id="internet-popup-text"></p>
     </div>
 </body>
