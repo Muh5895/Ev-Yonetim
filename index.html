@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Çeviri metinleri
             const translations = {
                 tr: {
                     time: "Saat: ",
@@ -32,11 +31,9 @@
                 },
             };
 
-            // Varsayılan dil ve tema
             let currentLanguage = "tr";
             let currentTheme = "dark";
 
-            // Saat güncelleme işlevi
             function updateTime() {
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
@@ -45,11 +42,8 @@
                 document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
             }
 
-            // Çeviri işlevi
             function translate(language) {
                 currentLanguage = language;
-
-                // Çeviriler
                 document.getElementById('time-label').textContent = translations[language].time;
                 document.getElementById('menu-title').textContent = translations[language].menu;
                 document.getElementById('light-control').textContent = translations[language].lightControl;
@@ -60,34 +54,32 @@
                 document.getElementById('theme-label').textContent = translations[language].selectTheme;
             }
 
-            // Tema değiştirme işlevi
             function changeTheme(theme) {
                 currentTheme = theme;
+                const body = document.body;
+
                 if (theme === 'dark') {
-                    document.body.classList.remove('bg-white', 'text-black');
-                    document.body.classList.add('bg-black', 'text-white');
+                    body.classList.remove('bg-white', 'text-black');
+                    body.classList.add('bg-black', 'text-white');
                 } else if (theme === 'light') {
-                    document.body.classList.remove('bg-black', 'text-white');
-                    document.body.classList.add('bg-white', 'text-black');
+                    body.classList.remove('bg-black', 'text-white');
+                    body.classList.add('bg-white');
+                    body.style.color = 'white'; // Açık tema için metin rengi beyaz
                 }
             }
 
-            // Başlangıç işlemleri
-            setInterval(updateTime, 1000); // Saat her saniye güncellenir
-            translate(currentLanguage); // Varsayılan dil Türkçe
-            changeTheme(currentTheme); // Varsayılan tema karanlık
+            setInterval(updateTime, 1000);
+            translate(currentLanguage);
+            changeTheme(currentTheme);
 
-            // Ayarlar menüsündeki dil seçici için olay dinleyici
             document.getElementById('language-select').addEventListener('change', function (event) {
                 translate(event.target.value);
             });
 
-            // Tema seçici için olay dinleyici
             document.getElementById('theme-select').addEventListener('change', function (event) {
                 changeTheme(event.target.value);
             });
 
-            // Ayarlar menüsünü açıp kapatma işlevi
             document.getElementById('settings-button').addEventListener('click', function () {
                 const settingsMenu = document.getElementById('settings-menu');
                 settingsMenu.classList.toggle('hidden');
@@ -95,7 +87,6 @@
         });
     </script>
     <style>
-        /* CSS Animasyonları */
         .transition-all {
             transition: all 0.5s ease-in-out;
         }
@@ -137,7 +128,7 @@
                 <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer menu-item">
                     <i class="fas fa-cog text-2xl menu-icon"></i>
                     <span id="settings" class="text-xl"></span>
-                    <i class="fas fa-chevron-down ml-2"></i> <!-- Menü açılır simgesi -->
+                    <i class="fas fa-chevron-down ml-2"></i>
                 </div>
                 <div id="settings-menu" class="hidden mt-4 space-y-4">
                     <label id="language-label" class="text-white block"></label>
