@@ -17,7 +17,9 @@
                     earthquakes: "Depremler",
                     settings: "Ayarlar",
                     selectLanguage: "Dil Seçimi",
-                    fontSelection: "Yazı Fontu Seçimi"
+                    fontSelection: "Yazı Fontu Seçimi",
+                    rotateWarning: "Lütfen cihazınızı yatay moda çevirin.",
+                    noInternet: "İnternet bağlantısı bulunamadı!"
                 },
                 en: {
                     time: "Time: ",
@@ -27,12 +29,25 @@
                     earthquakes: "Earthquakes",
                     settings: "Settings",
                     selectLanguage: "Language Selection",
-                    fontSelection: "Font Selection"
+                    fontSelection: "Font Selection",
+                    rotateWarning: "Please rotate your device to landscape mode.",
+                    noInternet: "No internet connection detected!"
                 },
             };
 
             let currentLanguage = "tr";
-            let currentFont = "sans-serif"; // Default font
+
+            function checkOrientation() {
+                if (window.innerHeight > window.innerWidth) {
+                    alert(translations[currentLanguage].rotateWarning);
+                }
+            }
+
+            function checkInternetConnection() {
+                if (!navigator.onLine) {
+                    alert(translations[currentLanguage].noInternet);
+                }
+            }
 
             function updateTime() {
                 const now = new Date();
@@ -55,116 +70,18 @@
                 document.getElementById('font-label').textContent = translations[language].fontSelection;
             }
 
-            async function fetchEarthquakes() {
-                try {
-                    const response = await fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live');
-                    const data = await response.json();
-                    const earthquakeList = document.getElementById('earthquake-list');
-                    earthquakeList.innerHTML = '';
-
-                    data.result.slice(0, 10).forEach(earthquake => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${earthquake.date_time} - ${earthquake.title} - Büyüklük: ${earthquake.mag}`;
-                        earthquakeList.appendChild(listItem);
-                    });
-                } catch (error) {
-                    console.error('Deprem verileri alınırken bir hata oluştu:', error);
-                }
-            }
-
-            function changeFont(font) {
-                currentFont = font;
-                document.body.style.fontFamily = font;
-            }
+            window.addEventListener('resize', checkOrientation);
+            window.addEventListener('load', () => {
+                checkOrientation();
+                checkInternetConnection();
+            });
+            window.addEventListener('online', () => alert(translations[currentLanguage].noInternet));
+            window.addEventListener('offline', () => alert(translations[currentLanguage].noInternet));
 
             setInterval(updateTime, 1000);
             translate(currentLanguage);
-
-            document.getElementById('earthquakes-button').addEventListener('click', function () {
-                const earthquakeSection = document.getElementById('earthquake-section');
-                earthquakeSection.classList.toggle('hidden');
-                if (!earthquakeSection.classList.contains('hidden')) {
-                    fetchEarthquakes();
-                }
-            });
-
-            // Font değişim işlevi
-            document.getElementById('font-select').addEventListener('change', function (event) {
-                changeFont(event.target.value);
-            });
         });
     </script>
-    <style>
-        .transition-all {
-            transition: all 0.5s ease-in-out;
-        }
-
-        .menu-item:hover {
-            background-color: #333;
-        }
-
-        .menu-icon {
-            border-radius: 50%;
-            padding: 10px;
-            margin-right: 10px;
-        }
-
-        /* Yatay Mod */
-        #main-menu {
-            display: flex;
-            flex-direction: row;
-            justify-content: flex-start;
-            width: 100%;
-            max-width: 1200px;
-            position: relative;
-        }
-
-        #main-content {
-            width: 60%;
-            padding: 20px;
-            position: relative;
-        }
-
-        .menu-container {
-            width: 30%;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        /* Overlay Katman */
-        #main-menu::after, .menu-container::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3); /* Yarı saydam overlay */
-            z-index: -1;
-        }
-
-        /* Depremler Butonu */
-        #earthquakes-button {
-            cursor: pointer;
-        }
-
-        /* Ayarların Yazı Fontu Seçimi */
-        #settings-menu select {
-            width: 100%;
-            padding: 8px;
-            background-color: #333;
-            color: white;
-            border: none;
-            border-radius: 4px;
-        }
-
-        /* Butonlar */
-        .menu-item {
-            cursor: pointer;
-        }
-    </style>
 </head>
 <body class="bg-black text-white flex justify-center items-center min-h-screen">
     <div id="main-menu" class="bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
@@ -189,24 +106,9 @@
                     <i class="fas fa-exclamation-triangle text-2xl menu-icon"></i>
                     <span id="earthquakes" class="text-xl"></span>
                 </div>
-                <ul id="earthquake-list" class="hidden mt-4 space-y-2 text-white"></ul>
                 <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer menu-item">
                     <i class="fas fa-cog text-2xl menu-icon"></i>
                     <span id="settings" class="text-xl"></span>
-                    <i class="fas fa-chevron-down ml-2"></i>
-                </div>
-                <div id="settings-menu" class="hidden mt-4 space-y-4">
-                    <label id="language-label" class="text-white block"></label>
-                    <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
-                        <option value="tr">Türkçe</option>
-                        <option value="en">English</option>
-                    </select>
-                    <label id="font-label" class="text-white block mt-4"></label>
-                    <select id="font-select" class="bg-gray-800 text-white px-4 py-2 rounded">
-                        <option value="sans-serif">Sans Serif</option>
-                        <option value="serif">Serif</option>
-                        <option value="monospace">Monospace</option>
-                    </select>
                 </div>
             </div>
         </div>
