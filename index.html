@@ -15,7 +15,9 @@
                     earthquakes: "Depremler",
                     settings: "Ayarlar",
                     weather: "Hava Durumu",
-                    diyarbakirWeather: "Diyarbakır Hava Durumu:"
+                    diyarbakirWeather: "Diyarbakır Hava Durumu:",
+                    orientationWarning: "Lütfen cihazınızı yatay moda çevirin!",
+                    internetActive: "İnternet: Aktif"
                 },
                 en: {
                     time: "Time: ",
@@ -23,7 +25,9 @@
                     earthquakes: "Earthquakes",
                     settings: "Settings",
                     weather: "Weather",
-                    diyarbakirWeather: "Diyarbakır Weather:"
+                    diyarbakirWeather: "Diyarbakır Weather:",
+                    orientationWarning: "Please switch to landscape mode!",
+                    internetActive: "Internet: Active"
                 }
             };
 
@@ -38,6 +42,17 @@
                 document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
             }
 
+            function checkOrientationAndInternet() {
+                const isLandscape = window.innerWidth > window.innerHeight;
+                const hasInternet = navigator.onLine;
+
+                document.getElementById('orientation-warning').textContent = 
+                    isLandscape ? "" : translations[currentLanguage].orientationWarning;
+
+                document.getElementById('internet-status').textContent = 
+                    hasInternet ? translations[currentLanguage].internetActive : "";
+            }
+
             function translate(language) {
                 currentLanguage = language;
                 localStorage.setItem('language', language);
@@ -47,6 +62,7 @@
                 document.getElementById('settings').textContent = translations[language].settings;
                 document.getElementById('weather').textContent = translations[language].weather;
                 document.getElementById('weather-popup-label').textContent = translations[language].diyarbakirWeather;
+                checkOrientationAndInternet();
             }
 
             document.getElementById('language-select').addEventListener('change', function (event) {
@@ -58,6 +74,10 @@
                 weatherPopupVisible = !weatherPopupVisible;
                 popup.style.display = weatherPopupVisible ? 'block' : 'none';
             });
+
+            window.addEventListener('resize', checkOrientationAndInternet);
+            window.addEventListener('online', checkOrientationAndInternet);
+            window.addEventListener('offline', checkOrientationAndInternet);
 
             setInterval(updateTime, 1000);
             translate(currentLanguage);
@@ -73,6 +93,7 @@
         #left-content {
             flex: 2;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             background-color: white;
@@ -116,6 +137,8 @@
 <body>
     <!-- Sol İçerik -->
     <div id="left-content">
+        <p id="orientation-warning" class="text-red-500 text-lg font-bold mb-2"></p>
+        <p id="internet-status" class="text-green-500 text-lg font-bold mb-2"></p>
         <div>
             <p id="time-label" class="text-2xl font-bold">Saat: </p>
             <p id="time" class="text-4xl font-bold"></p>
@@ -134,6 +157,14 @@
             <a href="https://weather.com/weather/today/l/37.9075,40.0742" target="_blank" class="text-blue-400 underline">
                 Hava Durumunu Gör
             </a>
+        </div>
+        <div id="earthquake-button" class="menu-button">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="earthquakes">Depremler</span>
+        </div>
+        <div id="settings-button" class="menu-button">
+            <i class="fas fa-cog"></i>
+            <span id="settings">Ayarlar</span>
         </div>
         <div id="settings-menu" class="mt-8">
             <label id="language-label" for="language-select" class="text-white">Dil Seçimi:</label>
