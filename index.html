@@ -12,24 +12,16 @@
                 tr: {
                     time: "Saat: ",
                     menu: "İŞLEMLER MENÜSÜ:",
-                    lightControl: "Işık Yönetim",
-                    camera: "Kamera",
                     earthquakes: "Depremler",
                     settings: "Ayarlar",
-                    selectLanguage: "Dil Seçimi",
-                    fontSelection: "Yazı Fontu Seçimi",
                     rotateWarning: "Lütfen cihazınızı yatay moda çevirin.",
                     noInternet: "İnternet bağlantısı bulunamadı!"
                 },
                 en: {
                     time: "Time: ",
                     menu: "MENU OPTIONS:",
-                    lightControl: "Light Control",
-                    camera: "Camera",
                     earthquakes: "Earthquakes",
                     settings: "Settings",
-                    selectLanguage: "Language Selection",
-                    fontSelection: "Font Selection",
                     rotateWarning: "Please rotate your device to landscape mode.",
                     noInternet: "No internet connection detected!"
                 },
@@ -37,15 +29,30 @@
 
             let currentLanguage = "tr";
 
+            function showAlert(message) {
+                const alertDiv = document.getElementById('alert');
+                alertDiv.textContent = message;
+                alertDiv.classList.remove('hidden');
+            }
+
+            function clearAlert() {
+                const alertDiv = document.getElementById('alert');
+                alertDiv.classList.add('hidden');
+            }
+
             function checkOrientation() {
                 if (window.innerHeight > window.innerWidth) {
-                    alert(translations[currentLanguage].rotateWarning);
+                    showAlert(translations[currentLanguage].rotateWarning);
+                } else {
+                    clearAlert();
                 }
             }
 
             function checkInternetConnection() {
                 if (!navigator.onLine) {
-                    alert(translations[currentLanguage].noInternet);
+                    showAlert(translations[currentLanguage].noInternet);
+                } else {
+                    clearAlert();
                 }
             }
 
@@ -57,58 +64,48 @@
                 document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
             }
 
-            function translate(language) {
-                currentLanguage = language;
-
-                document.getElementById('time-label').textContent = translations[language].time;
-                document.getElementById('menu-title').textContent = translations[language].menu;
-                document.getElementById('light-control').textContent = translations[language].lightControl;
-                document.getElementById('camera').textContent = translations[language].camera;
-                document.getElementById('earthquakes').textContent = translations[language].earthquakes;
-                document.getElementById('settings').textContent = translations[language].settings;
-                document.getElementById('language-label').textContent = translations[language].selectLanguage;
-                document.getElementById('font-label').textContent = translations[language].fontSelection;
-            }
-
             window.addEventListener('resize', checkOrientation);
             window.addEventListener('load', () => {
                 checkOrientation();
                 checkInternetConnection();
             });
-            window.addEventListener('online', () => alert(translations[currentLanguage].noInternet));
-            window.addEventListener('offline', () => alert(translations[currentLanguage].noInternet));
+            window.addEventListener('online', checkInternetConnection);
+            window.addEventListener('offline', checkInternetConnection);
 
             setInterval(updateTime, 1000);
-            translate(currentLanguage);
         });
     </script>
+    <style>
+        .disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body class="bg-black text-white flex justify-center items-center min-h-screen">
     <div id="main-menu" class="bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
         <div id="main-content" class="p-6 flex flex-col items-center justify-center">
+            <!-- Uyarı Mesajı -->
+            <div id="alert" class="text-red-500 text-xl font-bold hidden mb-4"></div>
+            <!-- Saat -->
             <div class="text-center">
-                <p id="time-label" class="text-6xl font-bold"></p>
+                <p id="time-label" class="text-6xl font-bold">Saat: </p>
                 <p id="time" class="text-6xl font-bold"></p>
             </div>
         </div>
         <div class="menu-container">
-            <h2 id="menu-title" class="text-xl font-bold mb-4"></h2>
+            <h2 id="menu-title" class="text-xl font-bold mb-4">İŞLEMLER MENÜSÜ:</h2>
             <div class="space-y-4">
-                <div class="flex items-center p-4 rounded bg-black text-white menu-item">
-                    <i class="fas fa-lightbulb text-2xl menu-icon"></i>
-                    <span id="light-control" class="text-xl"></span>
-                </div>
-                <div class="flex items-center p-4 rounded bg-black text-white menu-item">
-                    <i class="fas fa-video text-2xl menu-icon"></i>
-                    <span id="camera" class="text-xl"></span>
-                </div>
-                <div id="earthquakes-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer menu-item">
+                <!-- Depremler -->
+                <div class="flex items-center p-4 rounded bg-black text-white cursor-not-allowed menu-item disabled">
                     <i class="fas fa-exclamation-triangle text-2xl menu-icon"></i>
-                    <span id="earthquakes" class="text-xl"></span>
+                    <span id="earthquakes" class="text-xl">Depremler</span>
                 </div>
-                <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer menu-item">
+                <!-- Ayarlar -->
+                <div class="flex items-center p-4 rounded bg-black text-white cursor-not-allowed menu-item disabled">
                     <i class="fas fa-cog text-2xl menu-icon"></i>
-                    <span id="settings" class="text-xl"></span>
+                    <span id="settings" class="text-xl">Ayarlar</span>
                 </div>
             </div>
         </div>
