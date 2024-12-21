@@ -12,27 +12,25 @@
                 tr: {
                     time: "Saat: ",
                     menu: "İŞLEMLER MENÜSÜ:",
-                    weather: "Hava Durumu",
-                    alarm: "Alarm Kur",
-                    notes: "Not Al",
-                    news: "Haberler",
                     earthquakes: "Depremler",
-                    settings: "Ayarlar"
+                    settings: "Ayarlar",
+                    rotateWarning: "Telefonu Yatay Moda Alın",
+                    noInternet: "İnternet Bağlantısı Yok",
+                    selectLanguage: "Dil Seçimi:",
                 },
                 en: {
                     time: "Time: ",
                     menu: "MENU OPTIONS:",
-                    weather: "Weather",
-                    alarm: "Set Alarm",
-                    notes: "Take Notes",
-                    news: "News",
                     earthquakes: "Earthquakes",
-                    settings: "Settings"
+                    settings: "Settings",
+                    rotateWarning: "Please Rotate Your Device",
+                    noInternet: "No Internet Connection",
+                    selectLanguage: "Select Language:",
                 }
             };
 
             let currentLanguage = "tr";
-            let alarmTime = null;
+            let earthquakePopupVisible = false;
 
             function updateTime() {
                 const now = new Date();
@@ -40,142 +38,153 @@
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+            }
 
-                // Alarm zamanı geldiğinde uyarı tetiklenir
-                if (alarmTime && now.getHours() === alarmTime.hours && now.getMinutes() === alarmTime.minutes) {
-                    triggerAlarm();
+            function translate(language) {
+                currentLanguage = language;
+                document.getElementById('time-label').textContent = translations[language].time;
+                document.getElementById('menu-title').textContent = translations[language].menu;
+                document.getElementById('earthquakes').textContent = translations[language].earthquakes;
+                document.getElementById('settings').textContent = translations[language].settings;
+                document.getElementById('language-label').textContent = translations[language].selectLanguage;
+            }
+
+            document.getElementById('language-select').addEventListener('change', function (event) {
+                translate(event.target.value);
+            });
+
+            document.getElementById('earthquakes-button').addEventListener('click', function () {
+                const popup = document.getElementById('earthquake-popup');
+                earthquakePopupVisible = !earthquakePopupVisible;
+                popup.style.display = earthquakePopupVisible ? 'block' : 'none';
+            });
+
+            document.getElementById('settings-button').addEventListener('click', function () {
+                const settingsMenu = document.getElementById('settings-menu');
+                settingsMenu.classList.toggle('hidden');
+            });
+
+            function checkOrientation() {
+                const warning = document.getElementById('orientation-warning');
+                if (window.innerWidth < window.innerHeight) {
+                    warning.textContent = translations[currentLanguage].rotateWarning;
+                    warning.style.display = 'block';
+                } else {
+                    warning.style.display = 'none';
                 }
             }
 
-            function triggerAlarm() {
-                alert("Alarm Zamanı Geldi!");
-                const audio = new Audio('https://www.soundjay.com/button/beep-07.wav');
-                audio.play();
-                alarmTime = null;  // Alarmı kapat
+            function checkInternetConnection() {
+                const warning = document.getElementById('internet-warning');
+                if (!navigator.onLine) {
+                    warning.textContent = translations[currentLanguage].noInternet;
+                    warning.style.display = 'block';
+                } else {
+                    warning.style.display = 'none';
+                }
             }
-
-            function setAlarm(hours, minutes) {
-                alarmTime = { hours, minutes };
-                alert(`Alarm, ${hours}:${minutes} için kuruldu.`);
-            }
-
-            function showNews() {
-                alert("Son Dakika Haberleri Gösteriliyor...");
-            }
-
-            function showWeather() {
-                alert("Diyarbakır'ın Hava Durumu: 15°C, Bulutlu.");
-            }
-
-            function openSettings() {
-                alert("Dil ve alarm ayarlarını değiştirebilirsiniz.");
-            }
-
-            // Buton Tıklama İşlevleri
-            document.getElementById('weather-button').addEventListener('click', showWeather);
-            document.getElementById('alarm-button').addEventListener('click', function () {
-                const hours = prompt("Alarm için saat girin (0-23):");
-                const minutes = prompt("Alarm için dakika girin (0-59):");
-                setAlarm(parseInt(hours), parseInt(minutes));
-            });
-            document.getElementById('notes-button').addEventListener('click', function () {
-                console.log("Not al butonuna tıklandı.");
-            });
-            document.getElementById('news-button').addEventListener('click', showNews);
-            document.getElementById('earthquakes-button').addEventListener('click', function () {
-                console.log("Depremler butonuna tıklandı.");
-                alert("AFAD Depremleri sayfasına yönlendiriliyorsunuz.");
-                window.open('https://deprem.afad.gov.tr/');
-            });
-            document.getElementById('settings-button').addEventListener('click', openSettings);
 
             setInterval(updateTime, 1000);
+            setInterval(checkInternetConnection, 1000);
+            checkOrientation();
+
+            window.addEventListener('resize', checkOrientation);
         });
     </script>
     <style>
         body {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             min-height: 100vh;
             overflow: hidden;
-            background-color: black;
-            color: white;
-            font-family: Arial, sans-serif;
         }
-        #left-content, #right-menu {
+        #left-content {
+            flex: 2;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
-        }
-        #left-content {
-            flex: 1;
-            border-bottom: 2px solid gray;
-            padding: 20px;
+            background-color: white;
+            color: black;
+            position: relative;
         }
         #right-menu {
-            flex: 2;
-            overflow-y: auto;
+            flex: 1;
+            background-color: black;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
-            max-height: 100vh;
-            overflow-x: hidden;
-            width: 100%;
-        }
-        #time {
-            font-size: 3rem;
-            font-weight: bold;
         }
         .menu-button {
-            background-color: #1f2937;
+            background-color: black;
             color: white;
             padding: 10px 20px;
             border-radius: 8px;
-            margin: 10px 0;
+            margin-bottom: 20px;
             cursor: pointer;
-            text-align: center;
-            width: 80%;
         }
         .menu-button:hover {
-            background-color: #374151;
+            background-color: gray;
         }
-        h2 {
-            margin-bottom: 20px;
+        #earthquake-popup {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: gray;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #orientation-warning, #internet-warning {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <!-- Sol İçerik (Saat) -->
+    <!-- Sol İçerik -->
     <div id="left-content">
-        <p id="time-label" class="text-xl font-bold mb-4">Saat: </p>
-        <p id="time"></p>
+        <p id="orientation-warning"></p>
+        <p id="internet-warning"></p>
+        <div>
+            <p id="time-label" class="text-2xl font-bold">Saat: </p>
+            <p id="time" class="text-4xl font-bold"></p>
+        </div>
     </div>
 
-    <!-- Sağ Menü (İşlemler) -->
+    <!-- Sağ Menü -->
     <div id="right-menu">
-        <h2 id="menu-title" class="text-2xl font-bold mb-4">İŞLEMLER MENÜSÜ:</h2>
-        <div class="menu-button" id="weather-button">
-            <i class="fas fa-cloud-sun"></i> 
-            <span id="weather">Hava Durumu</span>
-        </div>
-        <div class="menu-button" id="alarm-button">
-            <i class="fas fa-clock"></i> 
-            <span id="alarm">Alarm Kur</span>
-        </div>
-        <div class="menu-button" id="notes-button">
-            <i class="fas fa-sticky-note"></i> 
-            <span id="notes">Not Al</span>
-        </div>
-        <div class="menu-button" id="news-button">
-            <i class="fas fa-newspaper"></i> 
-            <span id="news">Haberler</span>
-        </div>
-        <div class="menu-button" id="earthquakes-button">
-            <i class="fas fa-exclamation-triangle"></i> 
+        <h2 id="menu-title" class="text-xl font-bold mb-8">İŞLEMLER MENÜSÜ:</h2>
+        <div id="earthquakes-button" class="menu-button">
+            <i class="fas fa-exclamation-triangle"></i>
             <span id="earthquakes">Depremler</span>
         </div>
-        <div class="menu-button" id="settings-button">
-            <i class="fas fa-cog"></i> 
+        <div id="earthquake-popup">
+            <p>AFAD Deprem Bilgileri:</p>
+            <a href="https://deprem.afad.gov.tr/" target="_blank" class="text-blue-400 underline">Siteyi Aç</a>
+        </div>
+        <div id="settings-button" class="menu-button">
+            <i class="fas fa-cog"></i>
             <span id="settings">Ayarlar</span>
+        </div>
+        <div id="settings-menu" class="hidden">
+            <label id="language-label" for="language-select" class="text-white">Dil Seçimi:</label>
+            <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
+                <option value="tr">Türkçe</option>
+                <option value="en">English</option>
+            </select>
         </div>
     </div>
 </body>
