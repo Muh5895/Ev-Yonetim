@@ -20,6 +20,7 @@
             justify-content: center;
             background-color: white;
             color: black;
+            position: relative;
         }
         #right-menu {
             flex: 1;
@@ -46,8 +47,9 @@
         .popup {
             display: none;
             position: absolute;
-            top: 50px;
-            right: 10%;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background-color: white;
             color: black;
             padding: 15px;
@@ -58,13 +60,15 @@
         .alert {
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background-color: #f44336;
             color: white;
             padding: 10px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             margin-bottom: 10px;
+            z-index: 200;
         }
     </style>
 </head>
@@ -75,6 +79,7 @@
             <p id="time-label" class="text-2xl font-bold">Saat: </p>
             <p id="time" class="text-4xl font-bold"></p>
             <div id="upcoming-alarm" class="text-red-500 font-bold"></div>
+            <div id="alarm-count" class="text-green-500 mt-2">Kurulan Alarmlar: 0</div>
         </div>
     </div>
 
@@ -83,42 +88,44 @@
         <h2 id="menu-title" class="text-xl font-bold mb-8">İŞLEMLER MENÜSÜ:</h2>
         <div id="weather-button" class="menu-button">
             <i class="fas fa-cloud-sun"></i>
-            <span id="weather">Hava Durumu</span>
-        </div>
-        <div id="earthquake-button" class="menu-button">
-            <i class="fas fa-globe"></i>
-            <span id="earthquakes">Depremler</span>
+            <span>Hava Durumu</span>
         </div>
         <div id="settings-button" class="menu-button">
             <i class="fas fa-cog"></i>
-            <span id="settings">Ayarlar</span>
+            <span>Ayarlar</span>
         </div>
         <div id="alarm-button" class="menu-button">
             <i class="fas fa-bell"></i>
-            <span id="alarm">Alarm</span>
+            <span>Alarm</span>
         </div>
     </div>
 
     <!-- Pop-up -->
-    <div id="weather-popup" class="popup">Diyarbakır Hava Durumu: <a href="https://weather.com/weather/today" target="_blank" class="text-blue-500 underline">Gör</a></div>
-    <div id="earthquake-popup" class="popup">Türkiye'deki son depremler: <a href="https://www.afad.gov.tr/" target="_blank" class="text-blue-500 underline">Gör</a></div>
-    <div id="settings-popup" class="popup">
-        Dil Seçimi: 
-        <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
-            <option value="tr">Türkçe</option>
-            <option value="en">English</option>
-        </select>
-    </div>
     <div id="alarm-popup" class="popup">
-        <p id="set-alarm-label">Alarm Kur:</p>
+        <p>Alarm Kur:</p>
+        Gün:
+        <select id="alarm-days" multiple>
+            <option value="0">Pazartesi</option>
+            <option value="1">Salı</option>
+            <option value="2">Çarşamba</option>
+            <option value="3">Perşembe</option>
+            <option value="4">Cuma</option>
+            <option value="5">Cumartesi</option>
+            <option value="6">Pazar</option>
+        </select>
         Saat: <input id="alarm-hours" type="number" min="0" max="23" value="12" class="border border-gray-500 rounded w-16 p-1">
         Dakika: <input id="alarm-minutes" type="number" min="0" max="59" value="30" class="border border-gray-500 rounded w-16 p-1">
         <button onclick="setAlarm()" class="bg-blue-500 text-white px-4 py-2 rounded">Kur</button>
     </div>
 
+    <!-- İnternet ve Yatay Mod Uyarıları -->
+    <div id="internet-warning" class="alert" style="display: none;">İnternet Bağlantısı Yok</div>
+    <div id="landscape-warning" class="alert" style="display: none;">Yatay Modda Kullanılamaz</div>
+
     <script>
         let alertsContainer = [];
-        const alertDelay = 3000;
+        let alarms = [];
+        let alarmCount = 0;
 
         function showAlert(message) {
             const alert = document.createElement('div');
@@ -126,17 +133,7 @@
             alert.textContent = message;
             document.body.appendChild(alert);
 
-            alertsContainer.push(alert);
-            setTimeout(() => {
-                alert.remove();
-                alertsContainer.shift();
-            }, alertDelay);
-        }
-
-        function togglePopup(button) {
-            const id = button.id.split('-')[0];
-            document.querySelectorAll('.popup').forEach(popup => popup.style.display = 'none');
-            document.getElementById(`${id}-popup`).style.display = 'block';
+            setTimeout(() => alert.remove(), 3000);
         }
 
         function updateTime() {
@@ -145,21 +142,43 @@
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+
+            // Alarm Kontrolü
+            alarms.forEach(alarm => {
+                const currentDay = now.getDay();
+                const currentTime = `${hours}:${minutes}`;
+                if (alarm.days.includes(currentDay) && alarm.time === currentTime) {
+                    showAlert("Alarm Çalıyor!");
+                    playAlarm();
+                }
+            });
+        }
+
+        function playAlarm() {
+            const audio = new Audio("https://www.soundjay.com/button/beep-07.wav");
+            audio.loop = true;
+            audio.play();
+
+            const stopAlarm = () => {
+                audio.pause();
+                audio.currentTime = 0;
+            };
+
+            showAlert("Alarm Çalıyor! <button onclick='stopAlarm()'>Durdur</button>");
         }
 
         function setAlarm() {
-            const alarmHours = document.getElementById('alarm-hours').value;
-            const alarmMinutes = document.getElementById('alarm-minutes').value;
-
-            showAlert(`Alarm kuruldu: ${alarmHours}:${alarmMinutes}`);
+            const days = Array.from(document.getElementById('alarm-days').selectedOptions).map(opt => parseInt(opt.value));
+            const hours = String(document.getElementById('alarm-hours').value).padStart(2, '0');
+            const minutes = String(document.getElementById('alarm-minutes').value).padStart(2, '0');
+            const time = `${hours}:${minutes}`;
+            alarms.push({ days, time });
+            alarmCount++;
+            document.getElementById('alarm-count').textContent = `Kurulan Alarmlar: ${alarmCount}`;
+            showAlert(`Alarm Kuruldu: ${time}`);
         }
 
-        document.querySelectorAll(".menu-button").forEach(button => {
-            button.onclick = () => togglePopup(button);
-        });
-
         setInterval(updateTime, 1000);
-        updateTime();
     </script>
 </body>
 </html>
