@@ -15,7 +15,8 @@
                     earthquakes: "Depremler",
                     settings: "Ayarlar",
                     rotateWarning: "Telefonu Yatay Moda Alın",
-                    noInternet: "İnternet Bağlantısı Yok"
+                    noInternet: "İnternet Bağlantısı Yok",
+                    selectLanguage: "Dil Seçimi:"
                 },
                 en: {
                     time: "Time: ",
@@ -23,46 +24,12 @@
                     earthquakes: "Earthquakes",
                     settings: "Settings",
                     rotateWarning: "Please Rotate Your Device",
-                    noInternet: "No Internet Connection"
+                    noInternet: "No Internet Connection",
+                    selectLanguage: "Select Language:"
                 },
             };
 
             let currentLanguage = "tr";
-
-            function showAlert(message, imageSrc) {
-                const alertDiv = document.getElementById('alert');
-                const alertImage = document.getElementById('alert-image');
-                alertDiv.textContent = message;
-                alertImage.src = imageSrc;
-                alertDiv.classList.remove('hidden');
-            }
-
-            function clearAlert() {
-                const alertDiv = document.getElementById('alert');
-                alertDiv.classList.add('hidden');
-            }
-
-            function checkOrientation() {
-                if (window.innerHeight > window.innerWidth) {
-                    showAlert(
-                        translations[currentLanguage].rotateWarning,
-                        'rotate.png'
-                    );
-                } else {
-                    clearAlert();
-                }
-            }
-
-            function checkInternetConnection() {
-                if (!navigator.onLine) {
-                    showAlert(
-                        translations[currentLanguage].noInternet,
-                        'no-internet.png'
-                    );
-                } else {
-                    clearAlert();
-                }
-            }
 
             function updateTime() {
                 const now = new Date();
@@ -72,91 +39,111 @@
                 document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
             }
 
-            window.addEventListener('resize', checkOrientation);
-            window.addEventListener('load', () => {
-                checkOrientation();
-                checkInternetConnection();
-            });
-            window.addEventListener('online', checkInternetConnection);
-            window.addEventListener('offline', checkInternetConnection);
+            function showWarning(message) {
+                const warning = document.getElementById('warning');
+                warning.textContent = message;
+                warning.classList.remove('hidden');
+            }
 
+            function hideWarning() {
+                document.getElementById('warning').classList.add('hidden');
+            }
+
+            function checkOrientation() {
+                if (window.innerHeight > window.innerWidth) {
+                    showWarning(translations[currentLanguage].rotateWarning);
+                } else {
+                    hideWarning();
+                }
+            }
+
+            function translate(language) {
+                currentLanguage = language;
+                document.getElementById('time-label').textContent = translations[language].time;
+                document.getElementById('menu-title').textContent = translations[language].menu;
+                document.getElementById('earthquakes').textContent = translations[language].earthquakes;
+                document.getElementById('settings').textContent = translations[language].settings;
+                document.getElementById('language-label').textContent = translations[language].selectLanguage;
+            }
+
+            async function fetchEarthquakes() {
+                const earthquakeList = document.getElementById('earthquake-list');
+                earthquakeList.innerHTML = `<p>${translations[currentLanguage].loading || 'Yükleniyor...'}</p>`;
+                try {
+                    const response = await fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live');
+                    const data = await response.json();
+                    earthquakeList.innerHTML = '';
+
+                    data.result.forEach(earthquake => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `${earthquake.date_time} - ${earthquake.title} - Büyüklük: ${earthquake.mag}`;
+                        earthquakeList.appendChild(listItem);
+                    });
+                } catch (error) {
+                    earthquakeList.innerHTML = `<p>Deprem verileri alınırken bir hata oluştu!</p>`;
+                }
+            }
+
+            window.addEventListener('resize', checkOrientation);
+            window.addEventListener('load', checkOrientation);
             setInterval(updateTime, 1000);
 
             document.getElementById('language-select').addEventListener('change', function (event) {
-                currentLanguage = event.target.value;
-                document.getElementById('time-label').textContent = translations[currentLanguage].time;
-                document.getElementById('menu-title').textContent = translations[currentLanguage].menu;
-                document.getElementById('earthquakes').textContent = translations[currentLanguage].earthquakes;
-                document.getElementById('settings').textContent = translations[currentLanguage].settings;
-                checkOrientation();
-                checkInternetConnection();
-            });
-
-            document.getElementById('earthquakes-button').addEventListener('click', function () {
-                alert(translations[currentLanguage].earthquakes + " butonu tıklandı!");
+                translate(event.target.value);
             });
 
             document.getElementById('settings-button').addEventListener('click', function () {
-                alert(translations[currentLanguage].settings + " butonu tıklandı!");
+                document.getElementById('settings-menu').classList.toggle('hidden');
+                document.getElementById('earthquake-section').classList.add('hidden');
+            });
+
+            document.getElementById('earthquakes-button').addEventListener('click', function () {
+                document.getElementById('earthquake-section').classList.toggle('hidden');
+                document.getElementById('settings-menu').classList.add('hidden');
+                fetchEarthquakes();
             });
         });
     </script>
     <style>
-        .disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-        .alert-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background-color: white;
-            color: black;
-            border-radius: 8px;
+        #warning {
+            background-color: red;
+            color: white;
             padding: 10px;
+            border-radius: 8px;
+            text-align: center;
             margin-bottom: 20px;
-        }
-        #alert-image {
-            width: 40px;
-            height: 40px;
         }
     </style>
 </head>
 <body class="bg-black text-white flex justify-center items-center min-h-screen">
     <div id="main-menu" class="bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
         <div id="main-content" class="p-6 flex flex-col items-center justify-center">
-            <!-- Uyarı Mesajı -->
-            <div id="alert" class="alert-box hidden">
-                <img id="alert-image" src="" alt="Uyarı">
-                <span></span>
-            </div>
-            <!-- Saat -->
+            <div id="warning" class="hidden"></div>
             <div class="text-center">
                 <p id="time-label" class="text-6xl font-bold">Saat: </p>
                 <p id="time" class="text-6xl font-bold"></p>
             </div>
         </div>
-        <div class="menu-container">
+        <div class="menu-container p-4">
             <h2 id="menu-title" class="text-xl font-bold mb-4">İŞLEMLER MENÜSÜ:</h2>
             <div class="space-y-4">
-                <!-- Depremler -->
-                <div id="earthquakes-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer menu-item">
+                <div id="earthquakes-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer">
                     <i class="fas fa-exclamation-triangle text-2xl menu-icon"></i>
                     <span id="earthquakes" class="text-xl">Depremler</span>
                 </div>
-                <!-- Ayarlar -->
-                <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer menu-item">
+                <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer">
                     <i class="fas fa-cog text-2xl menu-icon"></i>
                     <span id="settings" class="text-xl">Ayarlar</span>
                 </div>
-                <!-- Dil Seçimi -->
-                <label for="language-select" class="text-white block mt-4">Dil Seçimi:</label>
+            </div>
+            <div id="settings-menu" class="hidden mt-4">
+                <label id="language-label" for="language-select" class="text-white">Dil Seçimi:</label>
                 <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
                     <option value="tr">Türkçe</option>
                     <option value="en">English</option>
                 </select>
             </div>
+            <ul id="earthquake-section" class="hidden mt-4 space-y-2 text-white"></ul>
         </div>
     </div>
 </body>
