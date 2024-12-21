@@ -113,7 +113,7 @@
                     if (alarmTime.getTime() <= now.getTime() && !alarm.triggered) {
                         alarm.triggered = true;
                         alert("Alarm Çalıyor!");
-                        const alarmSound = new Audio('https://www.soundjay.com/button/beep-07.wav');
+                        const alarmSound = new Audio('https://pixabay.com/tr/sound-effects/cyber-alarms-synthesized-116358/');
                         alarmSound.play();
                         if (navigator.vibrate) {
                             navigator.vibrate([500, 500, 500]);
