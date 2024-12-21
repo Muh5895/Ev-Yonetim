@@ -34,6 +34,7 @@
             let currentLanguage = localStorage.getItem('language') || 'tr';
             let alarms = [];
             let weatherPopupVisible = false;
+            let earthquakePopupVisible = false;
 
             // Güncel saati almak
             function updateTime() {
@@ -67,19 +68,24 @@
 
             // Depremler pop-up'ı
             document.getElementById('earthquakes-button').addEventListener('click', function () {
-                fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live')
-                    .then(response => response.json())
-                    .then(data => {
-                        let latestEarthquakes = data.result.slice(0, 5); // Son 5 deprem
-                        const earthquakeList = document.getElementById('earthquake-list');
-                        earthquakeList.innerHTML = '';
-                        latestEarthquakes.forEach((quake) => {
-                            const li = document.createElement('li');
-                            li.textContent = `${quake.date} - Magnitude: ${quake.mag} - Location: ${quake.title}`;
-                            earthquakeList.appendChild(li);
+                earthquakePopupVisible = !earthquakePopupVisible;
+                if (earthquakePopupVisible) {
+                    fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live')
+                        .then(response => response.json())
+                        .then(data => {
+                            let latestEarthquakes = data.result.slice(0, 5); // Son 5 deprem
+                            const earthquakeList = document.getElementById('earthquake-list');
+                            earthquakeList.innerHTML = '';
+                            latestEarthquakes.forEach((quake) => {
+                                const li = document.createElement('li');
+                                li.textContent = `${quake.date} - Magnitude: ${quake.mag} - Location: ${quake.title}`;
+                                earthquakeList.appendChild(li);
+                            });
+                            document.getElementById('earthquake-popup').style.display = 'block';
                         });
-                        document.getElementById('earthquake-popup').style.display = 'block';
-                    });
+                } else {
+                    document.getElementById('earthquake-popup').style.display = 'none';
+                }
             });
 
             // Alarm kurma
@@ -144,7 +150,7 @@
             margin-bottom: 20px;
         }
         #time {
-            font-size: 50px;
+            font-size: 60px;
             font-weight: bold;
         }
         #right-menu {
@@ -224,7 +230,7 @@
 
     <!-- Hava Durumu Popup -->
     <div id="weather-popup">
-        <h3 id="diyarbakir-weather">Diyarbakır Hava Durumu:</h3>
+        <h3 id="diyarbakir-weather">Diyarbakır Hava Durumu</h3>
         <a href="https://weather.com/weather/today/l/37.9075,40.0742" target="_blank" class="text-blue-400 underline">
             Hava Durumunu Gör
         </a>
