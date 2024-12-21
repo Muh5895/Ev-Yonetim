@@ -16,7 +16,9 @@
                     settings: "Ayarlar",
                     rotateWarning: "Telefonu Yatay Moda Alın",
                     noInternet: "İnternet Bağlantısı Yok",
-                    selectLanguage: "Dil Seçimi:"
+                    selectLanguage: "Dil Seçimi:",
+                    loading: "Yükleniyor...",
+                    errorFetching: "Deprem verileri alınırken bir hata oluştu!"
                 },
                 en: {
                     time: "Time: ",
@@ -25,8 +27,10 @@
                     settings: "Settings",
                     rotateWarning: "Please Rotate Your Device",
                     noInternet: "No Internet Connection",
-                    selectLanguage: "Select Language:"
-                },
+                    selectLanguage: "Select Language:",
+                    loading: "Loading...",
+                    errorFetching: "An error occurred while fetching earthquake data!"
+                }
             };
 
             let currentLanguage = "tr";
@@ -39,22 +43,33 @@
                 document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
             }
 
-            function showWarning(message) {
-                const warning = document.getElementById('warning');
-                warning.textContent = message;
-                warning.classList.remove('hidden');
+            function showWarning() {
+                const warnings = document.getElementById('warnings');
+                warnings.innerHTML = '';
+                if (navigator.onLine === false) {
+                    const internetWarning = document.createElement('div');
+                    internetWarning.textContent = translations[currentLanguage].noInternet;
+                    internetWarning.classList.add('mb-2');
+                    warnings.appendChild(internetWarning);
+                }
+                if (window.innerHeight > window.innerWidth) {
+                    const orientationWarning = document.createElement('div');
+                    orientationWarning.textContent = translations[currentLanguage].rotateWarning;
+                    warnings.appendChild(orientationWarning);
+                }
+                warnings.classList.remove('hidden');
             }
 
             function hideWarning() {
-                document.getElementById('warning').classList.add('hidden');
+                const warnings = document.getElementById('warnings');
+                if (navigator.onLine && window.innerHeight < window.innerWidth) {
+                    warnings.classList.add('hidden');
+                }
             }
 
-            function checkOrientation() {
-                if (window.innerHeight > window.innerWidth) {
-                    showWarning(translations[currentLanguage].rotateWarning);
-                } else {
-                    hideWarning();
-                }
+            function checkStatus() {
+                showWarning();
+                hideWarning();
             }
 
             function translate(language) {
@@ -68,7 +83,7 @@
 
             async function fetchEarthquakes() {
                 const earthquakeList = document.getElementById('earthquake-list');
-                earthquakeList.innerHTML = `<p>${translations[currentLanguage].loading || 'Yükleniyor...'}</p>`;
+                earthquakeList.innerHTML = `<p>${translations[currentLanguage].loading}</p>`;
                 try {
                     const response = await fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live');
                     const data = await response.json();
@@ -76,16 +91,21 @@
 
                     data.result.forEach(earthquake => {
                         const listItem = document.createElement('li');
-                        listItem.textContent = `${earthquake.date_time} - ${earthquake.title} - Büyüklük: ${earthquake.mag}`;
+                        listItem.textContent = `${earthquake.date_time} - ${earthquake.title} - ${
+                            currentLanguage === 'tr' ? 'Büyüklük' : 'Magnitude'
+                        }: ${earthquake.mag}`;
                         earthquakeList.appendChild(listItem);
                     });
                 } catch (error) {
-                    earthquakeList.innerHTML = `<p>Deprem verileri alınırken bir hata oluştu!</p>`;
+                    earthquakeList.innerHTML = `<p>${translations[currentLanguage].errorFetching}</p>`;
                 }
             }
 
-            window.addEventListener('resize', checkOrientation);
-            window.addEventListener('load', checkOrientation);
+            window.addEventListener('resize', checkStatus);
+            window.addEventListener('load', checkStatus);
+            window.addEventListener('online', checkStatus);
+            window.addEventListener('offline', checkStatus);
+
             setInterval(updateTime, 1000);
 
             document.getElementById('language-select').addEventListener('change', function (event) {
@@ -105,7 +125,7 @@
         });
     </script>
     <style>
-        #warning {
+        #warnings {
             background-color: red;
             color: white;
             padding: 10px;
@@ -118,7 +138,7 @@
 <body class="bg-black text-white flex justify-center items-center min-h-screen">
     <div id="main-menu" class="bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
         <div id="main-content" class="p-6 flex flex-col items-center justify-center">
-            <div id="warning" class="hidden"></div>
+            <div id="warnings" class="hidden"></div>
             <div class="text-center">
                 <p id="time-label" class="text-6xl font-bold">Saat: </p>
                 <p id="time" class="text-6xl font-bold"></p>
