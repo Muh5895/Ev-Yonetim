@@ -6,107 +6,6 @@
     <title>Ev Asistanı</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const translations = {
-                tr: {
-                    time: "Saat: ",
-                    menu: "İŞLEMLER MENÜSÜ:",
-                    earthquakes: "Depremler",
-                    settings: "Ayarlar",
-                    weather: "Hava Durumu",
-                    diyarbakirWeather: "Diyarbakır Hava Durumu:",
-                    orientationWarning: "Lütfen cihazınızı yatay moda çevirin!",
-                    internetActive: "İnternet: Aktif",
-                    internetInactive: "İnternet: Yok",
-                    chooseLanguage: "Dil Seçimi:"
-                },
-                en: {
-                    time: "Time: ",
-                    menu: "MENU OPTIONS:",
-                    earthquakes: "Earthquakes",
-                    settings: "Settings",
-                    weather: "Weather",
-                    diyarbakirWeather: "Diyarbakır Weather:",
-                    orientationWarning: "Please switch to landscape mode!",
-                    internetActive: "Internet: Active",
-                    internetInactive: "Internet: Not Available",
-                    chooseLanguage: "Choose Language:"
-                }
-            };
-
-            let currentLanguage = localStorage.getItem('language') || 'tr';
-
-            function translate(language) {
-                currentLanguage = language;
-                localStorage.setItem('language', language);
-                document.getElementById('time-label').textContent = translations[language].time;
-                document.getElementById('menu-title').textContent = translations[language].menu;
-                document.getElementById('earthquakes').textContent = translations[language].earthquakes;
-                document.getElementById('settings').textContent = translations[language].settings;
-                document.getElementById('weather').textContent = translations[language].weather;
-                document.getElementById('weather-popup-label').textContent = translations[language].diyarbakirWeather;
-                document.getElementById('settings-popup-label').textContent = translations[language].chooseLanguage;
-            }
-
-            function togglePopup(buttonId, popupId) {
-                const button = document.getElementById(buttonId);
-                const popup = document.getElementById(popupId);
-                const rect = button.getBoundingClientRect();
-
-                popup.style.top = `${rect.top + window.scrollY + 10}px`;
-                popup.style.left = `${rect.right + 10}px`;
-                popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
-            }
-
-            function checkOrientationAndInternet() {
-                const isLandscape = window.innerWidth > window.innerHeight;
-                const hasInternet = navigator.onLine;
-
-                const orientationPopup = document.getElementById('orientation-popup');
-                const internetPopup = document.getElementById('internet-popup');
-
-                orientationPopup.style.display = isLandscape ? 'none' : 'block';
-                internetPopup.style.display = hasInternet ? 'none' : 'block';
-
-                document.getElementById('internet-popup-text').textContent = hasInternet
-                    ? translations[currentLanguage].internetActive
-                    : translations[currentLanguage].internetInactive;
-
-                document.getElementById('orientation-popup-text').textContent = isLandscape
-                    ? ''
-                    : translations[currentLanguage].orientationWarning;
-            }
-
-            document.getElementById('language-select').addEventListener('change', function (event) {
-                translate(event.target.value);
-            });
-
-            document.getElementById('weather-button').addEventListener('click', function () {
-                togglePopup('weather-button', 'weather-popup');
-            });
-
-            document.getElementById('earthquake-button').addEventListener('click', function () {
-                togglePopup('earthquake-button', 'earthquake-popup');
-            });
-
-            document.getElementById('settings-button').addEventListener('click', function () {
-                togglePopup('settings-button', 'settings-popup');
-            });
-
-            window.addEventListener('resize', checkOrientationAndInternet);
-            window.addEventListener('online', checkOrientationAndInternet);
-            window.addEventListener('offline', checkOrientationAndInternet);
-
-            setInterval(() => {
-                const now = new Date();
-                document.getElementById('time').textContent = now.toLocaleTimeString();
-            }, 1000);
-
-            translate(currentLanguage);
-            checkOrientationAndInternet();
-        });
-    </script>
     <style>
         body {
             display: flex;
@@ -117,7 +16,6 @@
         #left-content {
             flex: 2;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             background-color: white;
@@ -140,6 +38,7 @@
             border-radius: 8px;
             margin-bottom: 20px;
             cursor: pointer;
+            text-align: center;
         }
         .menu-button:hover {
             background-color: gray;
@@ -147,62 +46,97 @@
         .popup {
             display: none;
             position: absolute;
-            background-color: gray;
-            color: white;
-            padding: 20px;
+            background-color: white;
+            color: black;
+            padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
         }
-        .notification-popup {
+        .alert {
             position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: rgba(0, 0, 0, 0.8);
+            top: 20px;
+            right: 20px;
+            background-color: #f44336;
             color: white;
-            padding: 10px 20px;
-            margin: 5px 0;
-            border-radius: 5px;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
+    <!-- Sol İçerik -->
     <div id="left-content">
-        <p id="time-label" class="text-2xl font-bold">Saat: </p>
-        <p id="time" class="text-4xl font-bold"></p>
+        <div>
+            <p id="time-label" class="text-2xl font-bold">Saat: </p>
+            <p id="time" class="text-4xl font-bold"></p>
+            <div id="upcoming-alarm" class="text-red-500 font-bold"></div>
+        </div>
     </div>
+
+    <!-- Sağ Menü -->
     <div id="right-menu">
         <h2 id="menu-title" class="text-xl font-bold mb-8">İŞLEMLER MENÜSÜ:</h2>
         <div id="weather-button" class="menu-button">
-            <i class="fas fa-cloud-sun"></i> <span id="weather">Hava Durumu</span>
+            <i class="fas fa-cloud-sun"></i>
+            <span id="weather">Hava Durumu</span>
         </div>
         <div id="earthquake-button" class="menu-button">
-            <i class="fas fa-exclamation-triangle"></i> <span id="earthquakes">Depremler</span>
+            <i class="fas fa-globe"></i>
+            <span id="earthquakes">Depremler</span>
         </div>
         <div id="settings-button" class="menu-button">
-            <i class="fas fa-cog"></i> <span id="settings">Ayarlar</span>
+            <i class="fas fa-cog"></i>
+            <span id="settings">Ayarlar</span>
+        </div>
+        <div id="alarm-button" class="menu-button">
+            <i class="fas fa-bell"></i>
+            <span id="alarm">Alarm</span>
         </div>
     </div>
-    <div id="weather-popup" class="popup">
-        <p id="weather-popup-label">Diyarbakır Hava Durumu:</p>
-        <a href="https://weather.com/weather/today/l/37.9075,40.0742" target="_blank" class="text-blue-400 underline">Hava Durumunu Gör</a>
-    </div>
-    <div id="earthquake-popup" class="popup">
-        <p>Türkiye'deki Güncel Depremler:</p>
-        <a href="https://deprem.afad.gov.tr/" target="_blank" class="text-blue-400 underline">Depremleri Gör</a>
-    </div>
+
+    <!-- Pop-up -->
+    <div id="weather-popup" class="popup">Diyarbakır Hava Durumu: <a href="https://weather.com/weather/today" target="_blank" class="text-blue-500 underline">Gör</a></div>
+    <div id="earthquake-popup" class="popup">Türkiye'deki son depremler: <a href="https://www.afad.gov.tr/" target="_blank" class="text-blue-500 underline">Gör</a></div>
     <div id="settings-popup" class="popup">
-        <p id="settings-popup-label">Dil Seçimi:</p>
+        Dil Seçimi: 
         <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
             <option value="tr">Türkçe</option>
             <option value="en">English</option>
         </select>
     </div>
-    <div id="orientation-popup" class="notification-popup">
-        <p id="orientation-popup-text"></p>
+    <div id="alarm-popup" class="popup">
+        <p id="set-alarm-label">Alarm Kur:</p>
+        Saat: <input id="alarm-hours" type="number" min="0" max="23" value="12" class="border border-gray-500 rounded w-16 p-1">
+        Dakika: <input id="alarm-minutes" type="number" min="0" max="59" value="30" class="border border-gray-500 rounded w-16 p-1">
+        <button onclick="setAlarm()" class="bg-blue-500 text-white px-4 py-2 rounded">Kur</button>
     </div>
-    <div id="internet-popup" class="notification-popup">
-        <p id="internet-popup-text"></p>
-    </div>
+
+    <script>
+        const alertsContainer = [];
+        const alertDelay = 3000;
+
+        function showAlert(message) {
+            const alert = document.createElement('div');
+            alert.classList.add('alert');
+            alert.textContent = message;
+            document.body.appendChild(alert);
+
+            alertsContainer.push(alert);
+            setTimeout(() => {
+                alert.remove();
+                alertsContainer.shift();
+            }, alertDelay);
+        }
+
+        function setAlarm() {
+            // Alarm Kurulum Kodu Buraya Gelecek
+            showAlert("Alarm kuruldu!");
+        }
+
+        document.querySelectorAll(".menu-button").forEach(button => button.onclick = () => togglePopup(button));  
+    </script>
 </body>
 </html>
