@@ -17,7 +17,9 @@
                     weather: "Hava Durumu",
                     diyarbakirWeather: "Diyarbakır Hava Durumu:",
                     orientationWarning: "Lütfen cihazınızı yatay moda çevirin!",
-                    internetActive: "İnternet: Aktif"
+                    internetActive: "İnternet: Aktif",
+                    internetInactive: "İnternet: Yok",
+                    chooseLanguage: "Dil Seçimi:"
                 },
                 en: {
                     time: "Time: ",
@@ -27,31 +29,13 @@
                     weather: "Weather",
                     diyarbakirWeather: "Diyarbakır Weather:",
                     orientationWarning: "Please switch to landscape mode!",
-                    internetActive: "Internet: Active"
+                    internetActive: "Internet: Active",
+                    internetInactive: "Internet: Not Available",
+                    chooseLanguage: "Choose Language:"
                 }
             };
 
             let currentLanguage = localStorage.getItem('language') || 'tr';
-            let weatherPopupVisible = false;
-
-            function updateTime() {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
-            }
-
-            function checkOrientationAndInternet() {
-                const isLandscape = window.innerWidth > window.innerHeight;
-                const hasInternet = navigator.onLine;
-
-                document.getElementById('orientation-warning').textContent = 
-                    isLandscape ? "" : translations[currentLanguage].orientationWarning;
-
-                document.getElementById('internet-status').textContent = 
-                    hasInternet ? translations[currentLanguage].internetActive : "";
-            }
 
             function translate(language) {
                 currentLanguage = language;
@@ -62,7 +46,27 @@
                 document.getElementById('settings').textContent = translations[language].settings;
                 document.getElementById('weather').textContent = translations[language].weather;
                 document.getElementById('weather-popup-label').textContent = translations[language].diyarbakirWeather;
-                checkOrientationAndInternet();
+                document.getElementById('settings-popup-label').textContent = translations[language].chooseLanguage;
+            }
+
+            function togglePopup(popupId) {
+                const popup = document.getElementById(popupId);
+                popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+            }
+
+            function checkOrientationAndInternet() {
+                const isLandscape = window.innerWidth > window.innerHeight;
+                const hasInternet = navigator.onLine;
+
+                const orientationPopup = document.getElementById('orientation-popup');
+                const internetPopup = document.getElementById('internet-popup');
+
+                orientationPopup.style.display = isLandscape ? 'none' : 'block';
+                internetPopup.style.display = hasInternet ? 'none' : 'block';
+
+                document.getElementById('internet-popup-text').textContent = hasInternet
+                    ? translations[currentLanguage].internetActive
+                    : translations[currentLanguage].internetInactive;
             }
 
             document.getElementById('language-select').addEventListener('change', function (event) {
@@ -70,17 +74,28 @@
             });
 
             document.getElementById('weather-button').addEventListener('click', function () {
-                const popup = document.getElementById('weather-popup');
-                weatherPopupVisible = !weatherPopupVisible;
-                popup.style.display = weatherPopupVisible ? 'block' : 'none';
+                togglePopup('weather-popup');
+            });
+
+            document.getElementById('earthquake-button').addEventListener('click', function () {
+                togglePopup('earthquake-popup');
+            });
+
+            document.getElementById('settings-button').addEventListener('click', function () {
+                togglePopup('settings-popup');
             });
 
             window.addEventListener('resize', checkOrientationAndInternet);
             window.addEventListener('online', checkOrientationAndInternet);
             window.addEventListener('offline', checkOrientationAndInternet);
 
-            setInterval(updateTime, 1000);
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('time').textContent = now.toLocaleTimeString();
+            }, 1000);
+
             translate(currentLanguage);
+            checkOrientationAndInternet();
         });
     </script>
     <style>
@@ -120,59 +135,66 @@
         .menu-button:hover {
             background-color: gray;
         }
-        #weather-popup {
+        .popup {
             display: none;
             position: absolute;
-            top: 50%;
+            top: 10%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, 0);
             background-color: gray;
             color: white;
-            padding: 10px;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .popup-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
 <body>
-    <!-- Sol İçerik -->
     <div id="left-content">
-        <p id="orientation-warning" class="text-red-500 text-lg font-bold mb-2"></p>
-        <p id="internet-status" class="text-green-500 text-lg font-bold mb-2"></p>
-        <div>
-            <p id="time-label" class="text-2xl font-bold">Saat: </p>
-            <p id="time" class="text-4xl font-bold"></p>
-        </div>
+        <p id="time-label" class="text-2xl font-bold">Saat: </p>
+        <p id="time" class="text-4xl font-bold"></p>
     </div>
-
-    <!-- Sağ Menü -->
     <div id="right-menu">
         <h2 id="menu-title" class="text-xl font-bold mb-8">İŞLEMLER MENÜSÜ:</h2>
         <div id="weather-button" class="menu-button">
-            <i class="fas fa-cloud-sun"></i>
-            <span id="weather">Hava Durumu</span>
-        </div>
-        <div id="weather-popup">
-            <p id="weather-popup-label">Diyarbakır Hava Durumu:</p>
-            <a href="https://weather.com/weather/today/l/37.9075,40.0742" target="_blank" class="text-blue-400 underline">
-                Hava Durumunu Gör
-            </a>
+            <i class="fas fa-cloud-sun"></i> <span id="weather">Hava Durumu</span>
         </div>
         <div id="earthquake-button" class="menu-button">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span id="earthquakes">Depremler</span>
+            <i class="fas fa-exclamation-triangle"></i> <span id="earthquakes">Depremler</span>
         </div>
         <div id="settings-button" class="menu-button">
-            <i class="fas fa-cog"></i>
-            <span id="settings">Ayarlar</span>
+            <i class="fas fa-cog"></i> <span id="settings">Ayarlar</span>
         </div>
-        <div id="settings-menu" class="mt-8">
-            <label id="language-label" for="language-select" class="text-white">Dil Seçimi:</label>
-            <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
-                <option value="tr">Türkçe</option>
-                <option value="en">English</option>
-            </select>
-        </div>
+    </div>
+    <div id="weather-popup" class="popup">
+        <p id="weather-popup-label">Diyarbakır Hava Durumu:</p>
+        <a href="https://weather.com/weather/today/l/37.9075,40.0742" target="_blank" class="text-blue-400 underline">Hava Durumunu Gör</a>
+    </div>
+    <div id="earthquake-popup" class="popup">
+        <p>Türkiye'deki Güncel Depremler:</p>
+        <a href="https://deprem.afad.gov.tr/" target="_blank" class="text-blue-400 underline">Depremleri Gör</a>
+    </div>
+    <div id="settings-popup" class="popup">
+        <p id="settings-popup-label">Dil Seçimi:</p>
+        <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
+            <option value="tr">Türkçe</option>
+            <option value="en">English</option>
+        </select>
+    </div>
+    <div id="orientation-popup" class="popup" style="background-color: red; top: 5%;">
+        <p id="orientation-popup-text"></p>
+    </div>
+    <div id="internet-popup" class="popup" style="background-color: orange; top: 15%;">
+        <p id="internet-popup-text"></p>
     </div>
 </body>
 </html>
