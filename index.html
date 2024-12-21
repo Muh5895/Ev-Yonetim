@@ -78,7 +78,7 @@
                             earthquakeList.innerHTML = '';
                             latestEarthquakes.forEach((quake) => {
                                 const li = document.createElement('li');
-                                li.textContent = `${quake.date} - Magnitude: ${quake.mag} - Location: ${quake.title}`;
+                                li.textContent = `${quake.date} - Büyüklük: ${quake.mag} - Konum: ${quake.title}`;
                                 earthquakeList.appendChild(li);
                             });
                             document.getElementById('earthquake-popup').style.display = 'block';
@@ -90,7 +90,7 @@
 
             // Alarm kurma
             document.getElementById('alarm-button').addEventListener('click', function () {
-                const alarmTime = prompt("Alarm saatini (HH:MM) formatında girin:");
+                const alarmTime = prompt("Alarm saatini (Saat:Dakika) formatında girin:");
                 if (alarmTime) {
                     const [hours, minutes] = alarmTime.split(':').map(num => parseInt(num, 10));
                     alarms.push({ hours, minutes, triggered: false });
