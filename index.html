@@ -46,6 +46,8 @@
         .popup {
             display: none;
             position: absolute;
+            top: 50px;
+            right: 10%;
             background-color: white;
             color: black;
             padding: 15px;
@@ -115,7 +117,7 @@
     </div>
 
     <script>
-        const alertsContainer = [];
+        let alertsContainer = [];
         const alertDelay = 3000;
 
         function showAlert(message) {
@@ -131,12 +133,33 @@
             }, alertDelay);
         }
 
-        function setAlarm() {
-            // Alarm Kurulum Kodu Buraya Gelecek
-            showAlert("Alarm kuruldu!");
+        function togglePopup(button) {
+            const id = button.id.split('-')[0];
+            document.querySelectorAll('.popup').forEach(popup => popup.style.display = 'none');
+            document.getElementById(`${id}-popup`).style.display = 'block';
         }
 
-        document.querySelectorAll(".menu-button").forEach(button => button.onclick = () => togglePopup(button));  
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        function setAlarm() {
+            const alarmHours = document.getElementById('alarm-hours').value;
+            const alarmMinutes = document.getElementById('alarm-minutes').value;
+
+            showAlert(`Alarm kuruldu: ${alarmHours}:${alarmMinutes}`);
+        }
+
+        document.querySelectorAll(".menu-button").forEach(button => {
+            button.onclick = () => togglePopup(button);
+        });
+
+        setInterval(updateTime, 1000);
+        updateTime();
     </script>
 </body>
 </html>
