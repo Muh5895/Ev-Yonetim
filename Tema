@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ev Asistanı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Menü öğelerine ortak arka plan */
+        .menu-item {
+            background-color: #333; /* Gri arka plan */
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Hover efekti */
+        .menu-item:hover {
+            background-color: #555;
+        }
+
+        .menu-icon {
+            border-radius: 50%;
+            padding: 10px;
+            margin-right: 10px;
+        }
+
+        .menu-text {
+            color: white;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body class="bg-black text-white flex justify-center items-center min-h-screen">
+    <div id="main-menu" class="flex flex-col bg-black rounded-lg overflow-hidden shadow-lg p-6 space-y-4">
+        <div id="main-content" class="text-center">
+            <p id="time-label" class="text-3xl font-bold mb-4">Saat:</p>
+            <p id="time" class="text-6xl font-bold"></p>
+        </div>
+        <h2 id="menu-title" class="text-xl font-bold mb-4">İŞLEMLER MENÜSÜ:</h2>
+        <div class="space-y-4">
+            <div class="menu-item">
+                <i class="fas fa-lightbulb text-2xl menu-icon"></i>
+                <span class="menu-text">Işık Yönetim</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-video text-2xl menu-icon"></i>
+                <span class="menu-text">Kamera</span>
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-exclamation-triangle text-2xl menu-icon"></i>
+                <span class="menu-text">Afetler</span>
+            </div>
+            <div id="settings-button" class="menu-item cursor-pointer">
+                <i class="fas fa-cog text-2xl menu-icon"></i>
+                <span class="menu-text">Ayarlar</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Saat güncelleme işlevi
+            function updateTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+
+            // Başlangıç işlemleri
+            setInterval(updateTime, 1000); // Saat her saniye güncellenir
+        });
+    </script>
+</body>
+</html>
