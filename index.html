@@ -14,24 +14,26 @@
                     menu: "İŞLEMLER MENÜSÜ:",
                     earthquakes: "Depremler",
                     settings: "Ayarlar",
-                    rotateWarning: "Lütfen cihazınızı yatay moda çevirin.",
-                    noInternet: "İnternet bağlantısı bulunamadı!"
+                    rotateWarning: "Telefonu Yatay Moda Alın",
+                    noInternet: "İnternet Bağlantısı Yok"
                 },
                 en: {
                     time: "Time: ",
                     menu: "MENU OPTIONS:",
                     earthquakes: "Earthquakes",
                     settings: "Settings",
-                    rotateWarning: "Please rotate your device to landscape mode.",
-                    noInternet: "No internet connection detected!"
+                    rotateWarning: "Please Rotate Your Device",
+                    noInternet: "No Internet Connection"
                 },
             };
 
             let currentLanguage = "tr";
 
-            function showAlert(message) {
+            function showAlert(message, imageSrc) {
                 const alertDiv = document.getElementById('alert');
+                const alertImage = document.getElementById('alert-image');
                 alertDiv.textContent = message;
+                alertImage.src = imageSrc;
                 alertDiv.classList.remove('hidden');
             }
 
@@ -42,7 +44,10 @@
 
             function checkOrientation() {
                 if (window.innerHeight > window.innerWidth) {
-                    showAlert(translations[currentLanguage].rotateWarning);
+                    showAlert(
+                        translations[currentLanguage].rotateWarning,
+                        'rotate.png'
+                    );
                 } else {
                     clearAlert();
                 }
@@ -50,7 +55,10 @@
 
             function checkInternetConnection() {
                 if (!navigator.onLine) {
-                    showAlert(translations[currentLanguage].noInternet);
+                    showAlert(
+                        translations[currentLanguage].noInternet,
+                        'no-internet.png'
+                    );
                 } else {
                     clearAlert();
                 }
@@ -73,6 +81,24 @@
             window.addEventListener('offline', checkInternetConnection);
 
             setInterval(updateTime, 1000);
+
+            document.getElementById('language-select').addEventListener('change', function (event) {
+                currentLanguage = event.target.value;
+                document.getElementById('time-label').textContent = translations[currentLanguage].time;
+                document.getElementById('menu-title').textContent = translations[currentLanguage].menu;
+                document.getElementById('earthquakes').textContent = translations[currentLanguage].earthquakes;
+                document.getElementById('settings').textContent = translations[currentLanguage].settings;
+                checkOrientation();
+                checkInternetConnection();
+            });
+
+            document.getElementById('earthquakes-button').addEventListener('click', function () {
+                alert(translations[currentLanguage].earthquakes + " butonu tıklandı!");
+            });
+
+            document.getElementById('settings-button').addEventListener('click', function () {
+                alert(translations[currentLanguage].settings + " butonu tıklandı!");
+            });
         });
     </script>
     <style>
@@ -81,13 +107,30 @@
             opacity: 0.5;
             pointer-events: none;
         }
+        .alert-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: white;
+            color: black;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        #alert-image {
+            width: 40px;
+            height: 40px;
+        }
     </style>
 </head>
 <body class="bg-black text-white flex justify-center items-center min-h-screen">
     <div id="main-menu" class="bg-white dark:bg-black rounded-lg overflow-hidden shadow-lg">
         <div id="main-content" class="p-6 flex flex-col items-center justify-center">
             <!-- Uyarı Mesajı -->
-            <div id="alert" class="text-red-500 text-xl font-bold hidden mb-4"></div>
+            <div id="alert" class="alert-box hidden">
+                <img id="alert-image" src="" alt="Uyarı">
+                <span></span>
+            </div>
             <!-- Saat -->
             <div class="text-center">
                 <p id="time-label" class="text-6xl font-bold">Saat: </p>
@@ -98,15 +141,21 @@
             <h2 id="menu-title" class="text-xl font-bold mb-4">İŞLEMLER MENÜSÜ:</h2>
             <div class="space-y-4">
                 <!-- Depremler -->
-                <div class="flex items-center p-4 rounded bg-black text-white cursor-not-allowed menu-item disabled">
+                <div id="earthquakes-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer menu-item">
                     <i class="fas fa-exclamation-triangle text-2xl menu-icon"></i>
                     <span id="earthquakes" class="text-xl">Depremler</span>
                 </div>
                 <!-- Ayarlar -->
-                <div class="flex items-center p-4 rounded bg-black text-white cursor-not-allowed menu-item disabled">
+                <div id="settings-button" class="flex items-center p-4 rounded bg-black text-white cursor-pointer menu-item">
                     <i class="fas fa-cog text-2xl menu-icon"></i>
                     <span id="settings" class="text-xl">Ayarlar</span>
                 </div>
+                <!-- Dil Seçimi -->
+                <label for="language-select" class="text-white block mt-4">Dil Seçimi:</label>
+                <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
+                    <option value="tr">Türkçe</option>
+                    <option value="en">English</option>
+                </select>
             </div>
         </div>
     </div>
