@@ -41,6 +41,7 @@
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
 
+                // Alarm zamanı geldiğinde uyarı tetiklenir
                 if (alarmTime && now.getHours() === alarmTime.hours && now.getMinutes() === alarmTime.minutes) {
                     triggerAlarm();
                 }
@@ -66,10 +67,16 @@
                 alert("Diyarbakır'ın Hava Durumu: 15°C, Bulutlu.");
             }
 
+            function openSettings() {
+                alert("Dil ve alarm ayarlarını değiştirebilirsiniz.");
+            }
+
             // Buton Tıklama İşlevleri
             document.getElementById('weather-button').addEventListener('click', showWeather);
             document.getElementById('alarm-button').addEventListener('click', function () {
-                setAlarm(15, 30); // Alarm 15:30'da kuruluyor
+                const hours = prompt("Alarm için saat girin (0-23):");
+                const minutes = prompt("Alarm için dakika girin (0-59):");
+                setAlarm(parseInt(hours), parseInt(minutes));
             });
             document.getElementById('notes-button').addEventListener('click', function () {
                 console.log("Not al butonuna tıklandı.");
@@ -80,10 +87,7 @@
                 alert("AFAD Depremleri sayfasına yönlendiriliyorsunuz.");
                 window.open('https://deprem.afad.gov.tr/');
             });
-            document.getElementById('settings-button').addEventListener('click', function () {
-                console.log("Ayarlar butonuna tıklandı.");
-                alert("Dil ayarlarını seçin!");
-            });
+            document.getElementById('settings-button').addEventListener('click', openSettings);
 
             setInterval(updateTime, 1000);
         });
@@ -107,6 +111,7 @@
         #left-content {
             flex: 1;
             border-bottom: 2px solid gray;
+            padding: 20px;
         }
         #right-menu {
             flex: 2;
