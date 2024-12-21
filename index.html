@@ -11,32 +11,31 @@
             const translations = {
                 tr: {
                     time: "Saat: ",
-                    menu: "İşlem Menüsü",
-                    weather: "Hava Durumu",
+                    menu: "İŞLEMLER MENÜSÜ:",
                     earthquakes: "Depremler",
-                    alarm: "Alarm",
                     settings: "Ayarlar",
-                    earthquakeInfo: "Son 5 Deprem",
-                    diyarbakirWeather: "Diyarbakır Hava Durumu"
+                    weather: "Hava Durumu",
+                    diyarbakirWeather: "Diyarbakır Hava Durumu:",
+                    alarm: "Alarm Kur",
+                    selectDay: "Gün Seçin"
                 },
                 en: {
                     time: "Time: ",
-                    menu: "Menu Options",
-                    weather: "Weather",
+                    menu: "MENU OPTIONS:",
                     earthquakes: "Earthquakes",
-                    alarm: "Alarm",
                     settings: "Settings",
-                    earthquakeInfo: "Last 5 Earthquakes",
-                    diyarbakirWeather: "Diyarbakır Weather"
+                    weather: "Weather",
+                    diyarbakirWeather: "Diyarbakır Weather:",
+                    alarm: "Set Alarm",
+                    selectDay: "Select Day"
                 }
             };
 
             let currentLanguage = localStorage.getItem('language') || 'tr';
             let alarms = [];
-            let weatherPopupVisible = false;
-            let earthquakePopupVisible = false;
+            let alarmSound = new Audio('https://cdn.pixabay.com/download/audio/2023/11/21/audio_0a0bcdb00d.mp3');
 
-            // Güncel saati almak
+            // Update the time on the page
             function updateTime() {
                 const now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
@@ -45,95 +44,108 @@
                 document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
             }
 
-            // Çeviriyi güncellemek
+            // Display notifications about alarms
+            function checkAlarms() {
+                const now = new Date();
+                alarms.forEach(alarm => {
+                    const alarmTime = new Date(alarm.time);
+                    const timeDiff = alarmTime - now;
+                    if (timeDiff <= 60000 && timeDiff > 0) { // Alarm within 1 minute
+                        displayPopup(`Yaklaşan Alarm: ${alarm.time}`, 'alarm-popup');
+                    } else if (timeDiff <= 0) { // Alarm time passed
+                        alarmSound.play();
+                        displayPopup(`Alarm Çalıyor: ${alarm.time}`, 'alarm-popup');
+                        setTimeout(() => alarmSound.pause(), 5000);
+                    }
+                });
+            }
+
+            // Show the popup with the message
+            function displayPopup(message, id) {
+                const popup = document.getElementById(id);
+                popup.textContent = message;
+                popup.style.display = 'block';
+                setTimeout(() => popup.style.display = 'none', 5000);
+            }
+
+            // Set alarm
+            function setAlarm(time, day) {
+                alarms.push({ time, day });
+                alert(`Alarm Kuruldu: ${time}`);
+                updateAlarmCount();
+            }
+
+            function updateAlarmCount() {
+                document.getElementById('alarm-count').textContent = `Alarm Sayısı: ${alarms.length}`;
+            }
+
+            // Translate the page based on the selected language
             function translate(language) {
                 currentLanguage = language;
                 localStorage.setItem('language', language);
                 document.getElementById('time-label').textContent = translations[language].time;
                 document.getElementById('menu-title').textContent = translations[language].menu;
-                document.getElementById('weather').textContent = translations[language].weather;
                 document.getElementById('earthquakes').textContent = translations[language].earthquakes;
-                document.getElementById('earthquake-info').textContent = translations[language].earthquakeInfo;
-                document.getElementById('alarm-button').textContent = translations[language].alarm;
-                document.getElementById('settings-button').textContent = translations[language].settings;
-                document.getElementById('diyarbakir-weather').textContent = translations[language].diyarbakirWeather;
+                document.getElementById('settings').textContent = translations[language].settings;
+                document.getElementById('weather').textContent = translations[language].weather;
+                document.getElementById('weather-popup-label').textContent = translations[language].diyarbakirWeather;
+                document.getElementById('alarm').textContent = translations[language].alarm;
+                document.getElementById('select-day').textContent = translations[language].selectDay;
             }
 
-            // Hava durumu pop-up gösterme
-            document.getElementById('weather-button').addEventListener('click', function () {
-                weatherPopupVisible = !weatherPopupVisible;
-                const popup = document.getElementById('weather-popup');
-                popup.style.display = weatherPopupVisible ? 'block' : 'none';
-            });
-
-            // Depremler pop-up'ı
-            document.getElementById('earthquakes-button').addEventListener('click', function () {
-                earthquakePopupVisible = !earthquakePopupVisible;
-                if (earthquakePopupVisible) {
-                    fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live')
-                        .then(response => response.json())
-                        .then(data => {
-                            let latestEarthquakes = data.result.slice(0, 5); // Son 5 deprem
-                            const earthquakeList = document.getElementById('earthquake-list');
-                            earthquakeList.innerHTML = '';
-                            latestEarthquakes.forEach((quake) => {
-                                const li = document.createElement('li');
-                                li.textContent = `${quake.date} - Büyüklük: ${quake.mag} - Konum: ${quake.title}`;
-                                earthquakeList.appendChild(li);
-                            });
-                            document.getElementById('earthquake-popup').style.display = 'block';
-                        });
-                } else {
-                    document.getElementById('earthquake-popup').style.display = 'none';
-                }
-            });
-
-            // Alarm kurma
-            document.getElementById('alarm-button').addEventListener('click', function () {
-                const alarmTime = prompt("Alarm saatini (Saat:Dakika) formatında girin:");
-                if (alarmTime) {
-                    const [hours, minutes] = alarmTime.split(':').map(num => parseInt(num, 10));
-                    alarms.push({ hours, minutes, triggered: false });
-                    updateAlarmCount();
-                }
-            });
-
-            // Alarm sayısını saatin altında göster
-            function updateAlarmCount() {
-                const alarmCount = alarms.length;
-                document.getElementById('alarm-count').textContent = `Alarm: ${alarmCount}`;
-            }
-
-            // Alarmları kontrol et
-            function checkAlarms() {
-                const now = new Date();
-                alarms.forEach((alarm, index) => {
-                    const alarmTime = new Date();
-                    alarmTime.setHours(alarm.hours, alarm.minutes, 0, 0);
-                    if (alarmTime.getTime() <= now.getTime() && !alarm.triggered) {
-                        alarm.triggered = true;
-                        alert("Alarm Çalıyor!");
-                        const alarmSound = new Audio('https://pixabay.com/tr/sound-effects/cyber-alarms-synthesized-116358/');
-                        alarmSound.play();
-                        if (navigator.vibrate) {
-                            navigator.vibrate([500, 500, 500]);
-                        }
-                    }
-                });
-            }
-
-            // Alarm kontrolünü her saniye yap
-            setInterval(checkAlarms, 1000);
-
-            // Dil değiştirme
+            // Listen for language selection change
             document.getElementById('language-select').addEventListener('change', function (event) {
                 translate(event.target.value);
             });
 
-            // Saatin üstündeki uyarı metinlerini güncelle
-            setInterval(updateTime, 1000);
+            // Weather popup toggle
+            document.getElementById('weather-button').addEventListener('click', function () {
+                const popup = document.getElementById('weather-popup');
+                popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+            });
 
-            // Dil seçimi yapıldığında
+            // Earthquake popup toggle
+            document.getElementById('earthquake-button').addEventListener('click', function () {
+                const popup = document.getElementById('earthquake-popup');
+                popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+                fetchEarthquakes();
+            });
+
+            // Fetch earthquake data
+            function fetchEarthquakes() {
+                const earthquakeList = document.getElementById('earthquake-list');
+                earthquakeList.innerHTML = '';
+                fetch('https://api.orhanaydogdu.com.tr/deprem/live.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        const lastFiveEarthquakes = data.earthquakes.slice(0, 5);
+                        lastFiveEarthquakes.forEach(earthquake => {
+                            const li = document.createElement('li');
+                            li.textContent = `${earthquake.date}: ${earthquake.mag} - ${earthquake.place}`;
+                            earthquakeList.appendChild(li);
+                        });
+                    })
+                    .catch(error => console.error('Deprem verisi alınamadı:', error));
+            }
+
+            // Show alarm settings popup
+            document.getElementById('alarm-button').addEventListener('click', function () {
+                const popup = document.getElementById('alarm-popup');
+                popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
+            });
+
+            // Set alarm button
+            document.getElementById('set-alarm').addEventListener('click', function () {
+                const timeInput = document.getElementById('alarm-time');
+                const dateInput = document.getElementById('alarm-day');
+                const time = timeInput.value;
+                const day = dateInput.value;
+                setAlarm(time, day);
+            });
+
+            setInterval(updateTime, 1000);
+            setInterval(checkAlarms, 1000); // Check every second for alarms
+
             translate(currentLanguage);
         });
     </script>
@@ -142,105 +154,119 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            background-color: #f0f0f0;
-            padding: 10px;
+            overflow: hidden;
         }
+
         #left-content {
-            text-align: center;
-            margin-bottom: 20px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            color: black;
+            flex-direction: column;
         }
-        #time {
-            font-size: 60px;
-            font-weight: bold;
-        }
+
         #right-menu {
-            background-color: #333;
+            background-color: black;
             color: white;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
         }
+
         .menu-button {
-            background-color: #444;
+            background-color: black;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .menu-button:hover {
+            background-color: gray;
+        }
+
+        #weather-popup, #earthquake-popup, #alarm-popup {
+            display: none;
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: gray;
             color: white;
             padding: 10px;
             border-radius: 8px;
-            margin-bottom: 15px;
-            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .menu-button:hover {
-            background-color: #555;
-        }
-        #weather-popup, #earthquake-popup {
+
+        .alarm-popup {
             display: none;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            position: fixed;
-            top: 30%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-        }
-        #earthquake-list {
-            list-style-type: none;
-        }
-        #alarm-count {
-            font-size: 20px;
-            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-
-    <!-- Sol İçerik (Saat) -->
+    <!-- Sol İçerik -->
     <div id="left-content">
-        <p id="time-label" class="text-2xl font-bold">Saat: </p>
-        <p id="time" class="text-4xl font-bold"></p>
-        <p id="alarm-count"></p>
+        <div>
+            <p id="time-label" class="text-2xl font-bold">Saat: </p>
+            <p id="time" class="text-4xl font-bold"></p>
+        </div>
     </div>
 
     <!-- Sağ Menü -->
     <div id="right-menu">
         <h2 id="menu-title" class="text-xl font-bold mb-8">İŞLEMLER MENÜSÜ:</h2>
-        
         <div id="weather-button" class="menu-button">
             <i class="fas fa-cloud-sun"></i> <span id="weather">Hava Durumu</span>
         </div>
-        
-        <div id="earthquakes-button" class="menu-button">
-            <i class="fas fa-warehouse"></i> <span id="earthquakes">Depremler</span>
+        <div id="earthquake-button" class="menu-button">
+            <i class="fas fa-earthquake"></i> <span id="earthquakes">Depremler</span>
         </div>
-        
         <div id="alarm-button" class="menu-button">
             <i class="fas fa-bell"></i> <span id="alarm">Alarm Kur</span>
         </div>
 
-        <div id="settings-button" class="menu-button">
-            <i class="fas fa-cogs"></i> <span>Ayarlar</span>
-        </div>
-
         <!-- Dil Seçimi -->
-        <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
-            <option value="tr">Türkçe</option>
-            <option value="en">English</option>
-        </select>
+        <div id="settings-menu" class="mt-8">
+            <label for="language-select" class="text-white">Dil Seçimi:</label>
+            <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
+                <option value="tr">Türkçe</option>
+                <option value="en">English</option>
+            </select>
+        </div>
     </div>
 
-    <!-- Hava Durumu Popup -->
+    <!-- Hava Durumu Pop-up -->
     <div id="weather-popup">
-        <h3 id="diyarbakir-weather">Diyarbakır Hava Durumu</h3>
-        <a href="https://weather.com/weather/today/l/37.9075,40.0742" target="_blank" class="text-blue-400 underline">
-            Hava Durumunu Gör
-        </a>
+        <p id="weather-popup-label">Diyarbakır Hava Durumu:</p>
+        <a href="https://weather.com/weather/today/l/37.9075,40.0742" target="_blank" class="text-blue-400 underline">Hava Durumunu Gör</a>
     </div>
 
-    <!-- Depremler Popup -->
+    <!-- Depremler Pop-up -->
     <div id="earthquake-popup">
         <h3 id="earthquake-info">Son 5 Deprem:</h3>
         <ul id="earthquake-list"></ul>
     </div>
+
+    <!-- Alarm Pop-up -->
+    <div id="alarm-popup">
+        <h3>Alarm Kur</h3>
+        <label for="alarm-time">Alarm Zamanı:</label>
+        <input type="time" id="alarm-time" required>
+        <label for="alarm-day">Alarm Günü:</label>
+        <input type="date" id="alarm-day" required>
+        <button id="set-alarm">Alarmı Kur</button>
+    </div>
+
+    <div id="alarm-count">Alarm Sayısı: 0</div>
 
 </body>
 </html>
