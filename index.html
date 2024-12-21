@@ -30,6 +30,7 @@
             };
 
             let currentLanguage = "tr";
+            let earthquakePopupVisible = false;
 
             function updateTime() {
                 const now = new Date();
@@ -53,23 +54,41 @@
             });
 
             document.getElementById('earthquakes-button').addEventListener('click', function () {
-                const popup = document.createElement('div');
-                popup.className = 'fixed bg-gray-800 text-white rounded-lg shadow-lg p-4';
-                popup.style.top = '50px';
-                popup.style.left = 'calc(50% - 100px)';
-                popup.style.width = '200px';
-                popup.innerHTML = `
-                    <p>AFAD Deprem Bilgileri:</p>
-                    <a href="https://deprem.afad.gov.tr/" target="_blank" class="text-blue-400 underline">Siteyi Aç</a>
-                `;
-                document.body.appendChild(popup);
-
-                setTimeout(() => {
-                    popup.remove();
-                }, 5000);
+                const popup = document.getElementById('earthquake-popup');
+                earthquakePopupVisible = !earthquakePopupVisible;
+                popup.style.display = earthquakePopupVisible ? 'block' : 'none';
             });
 
+            document.getElementById('settings-button').addEventListener('click', function () {
+                const settingsMenu = document.getElementById('settings-menu');
+                settingsMenu.classList.toggle('hidden');
+            });
+
+            function checkOrientation() {
+                const warning = document.getElementById('orientation-warning');
+                if (window.innerWidth < window.innerHeight) {
+                    warning.textContent = translations[currentLanguage].rotateWarning;
+                    warning.style.display = 'block';
+                } else {
+                    warning.style.display = 'none';
+                }
+            }
+
+            function checkInternetConnection() {
+                const warning = document.getElementById('internet-warning');
+                if (!navigator.onLine) {
+                    warning.textContent = translations[currentLanguage].noInternet;
+                    warning.style.display = 'block';
+                } else {
+                    warning.style.display = 'none';
+                }
+            }
+
             setInterval(updateTime, 1000);
+            setInterval(checkInternetConnection, 1000);
+            checkOrientation();
+
+            window.addEventListener('resize', checkOrientation);
         });
     </script>
     <style>
@@ -79,7 +98,16 @@
             min-height: 100vh;
             overflow: hidden;
         }
-        #left-menu {
+        #left-content {
+            flex: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            color: black;
+            position: relative;
+        }
+        #right-menu {
             flex: 1;
             background-color: black;
             color: white;
@@ -88,14 +116,6 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-        }
-        #right-content {
-            flex: 2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: white;
-            color: black;
         }
         .menu-button {
             background-color: black;
@@ -108,34 +128,63 @@
         .menu-button:hover {
             background-color: gray;
         }
+        #earthquake-popup {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: gray;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        #orientation-warning, #internet-warning {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <!-- Sol Menü -->
-    <div id="left-menu">
+    <!-- Sol İçerik -->
+    <div id="left-content">
+        <p id="orientation-warning"></p>
+        <p id="internet-warning"></p>
+        <div>
+            <p id="time-label" class="text-2xl font-bold">Saat: </p>
+            <p id="time" class="text-4xl font-bold"></p>
+        </div>
+    </div>
+
+    <!-- Sağ Menü -->
+    <div id="right-menu">
         <h2 id="menu-title" class="text-xl font-bold mb-8">İŞLEMLER MENÜSÜ:</h2>
         <div id="earthquakes-button" class="menu-button">
             <i class="fas fa-exclamation-triangle"></i>
             <span id="earthquakes">Depremler</span>
         </div>
+        <div id="earthquake-popup">
+            <p>AFAD Deprem Bilgileri:</p>
+            <a href="https://deprem.afad.gov.tr/" target="_blank" class="text-blue-400 underline">Siteyi Aç</a>
+        </div>
         <div id="settings-button" class="menu-button">
             <i class="fas fa-cog"></i>
             <span id="settings">Ayarlar</span>
         </div>
-        <div class="mt-4">
+        <div id="settings-menu" class="hidden">
             <label id="language-label" for="language-select" class="text-white">Dil Seçimi:</label>
             <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
                 <option value="tr">Türkçe</option>
                 <option value="en">English</option>
             </select>
-        </div>
-    </div>
-
-    <!-- Sağ İçerik -->
-    <div id="right-content">
-        <div>
-            <p id="time-label" class="text-2xl font-bold">Saat: </p>
-            <p id="time" class="text-4xl font-bold"></p>
         </div>
     </div>
 </body>
