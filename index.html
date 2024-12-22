@@ -3,201 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ev Asistanı</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-    <style>
-        body {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: flex-start;
-            min-height: 100vh;
-            background-image: url('https://source.unsplash.com/1920x1080/?nature,sky');
-            background-size: cover;
-            background-position: center;
-            margin: 0;
-            padding: 20px;
-        }
-        #left-content, #right-menu {
-            flex: 1;
-        }
-        #left-content {
-            text-align: left;
-            padding: 20px;
-            color: black;
-        }
-        #time {
-            font-size: 48px;
-            font-weight: bold;
-            color: black;
-        }
-        #right-menu {
-            text-align: right;
-            padding: 20px;
-        }
-        .menu-button {
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-        }
-        .menu-button:hover {
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-        .popup {
-            display: none;
-            background-color: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            position: fixed;
-            top: 20%;
-            left: 50%;
-            transform: translate(-50%);
-            z-index: 1000;
-        }
-        #internet-warning {
-            display: none;
-            background-color: red;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
-        #landscape-warning {
-            display: none;
-            background-color: orange;
-            color: black;
-            padding: 15px;
-            text-align: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
-        #alarm-popup {
-            display: none;
-            position: fixed;
-            top: 30%;
-            left: 50%;
-            transform: translate(-50%);
-            background-color: rgba(255, 0, 0, 0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            z-index: 1000;
-        }
-        #earthquake-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            color: white;
-        }
-        #earthquake-list li {
-            margin-bottom: 10px;
-            padding: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            border-radius: 8px;
-        }
-    </style>
+    <title>Ben Ev Asistanı</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="landscape-warning">Lütfen cihazınızı yatay moda alın!</div>
-    <div id="internet-warning">İnternet bağlantısı yok!</div>
-    
-    <div id="left-content">
-        <p id="time-label">Saat: </p>
-        <p id="time"></p>
-    </div>
-    <div id="right-menu">
-        <div id="weather-button" class="menu-button"><i class="fas fa-cloud-sun"></i> Hava Durumu</div>
-        <div id="earthquakes-button" class="menu-button"><i class="fas fa-warehouse"></i> Depremler</div>
-        <div id="alarm-button" class="menu-button"><i class="fas fa-bell"></i> Alarm Kur</div>
-        <div id="settings-button" class="menu-button"><i class="fas fa-cogs"></i> Ayarlar</div>
-        <div id="settings-popup" class="popup">
-            <label for="language-select">Dil:</label>
-            <select id="language-select">
-                <option value="tr">Türkçe</option>
-                <option value="en">English</option>
-            </select>
+    <div id="orientation-warning">Lütfen cihazınızı yatay moda çevirin.</div>
+    <div class="container">
+        <div class="left-panel">
+            <h1>Ben Ev Asistanı</h1>
+            <div id="clock"></div>
+        </div>
+        <div class="right-panel">
+            <div id="features">
+                <button id="toDoButton">Yapılacaklar</button>
+                <button id="shoppingButton">Alışveriş Listesi</button>
+                <button id="voiceButton">Sesli Komut</button>
+                <button id="securityButton">Güvenlik</button>
+                <button id="timerButton">Zamanlayıcı</button>
+                <button id="notesButton">Notlar</button>
+            </div>
+            <div id="feature-content"></div>
         </div>
     </div>
-
-    <div id="alarm-popup">
-        <p>Alarm Çalıyor!</p>
-        <button id="stop-alarm" class="menu-button">Durdur</button>
-    </div>
-
-    <div id="earthquake-popup" class="popup">
-        <h2>Son 5 Deprem</h2>
-        <ul id="earthquake-list"></ul>
-        <button id="close-earthquake-popup" class="menu-button">Kapat</button>
-    </div>
-
-    <script>
-        // Saat güncelleme
-        function updateTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('time').textContent = `${hours}:${minutes}`;
-        }
-        setInterval(updateTime, 1000);
-
-        // Yatay mod kontrolü
-        function checkOrientation() {
-            if (window.innerWidth < window.innerHeight) {
-                document.getElementById('landscape-warning').style.display = 'block';
-            } else {
-                document.getElementById('landscape-warning').style.display = 'none';
-            }
-        }
-        window.addEventListener('resize', checkOrientation);
-        checkOrientation();
-
-        // İnternet kontrolü
-        function checkInternet() {
-            if (!navigator.onLine) {
-                document.getElementById('internet-warning').style.display = 'block';
-            } else {
-                document.getElementById('internet-warning').style.display = 'none';
-            }
-        }
-        setInterval(checkInternet, 1000);
-
-        // Depremleri Getir
-        async function fetchEarthquakes() {
-            const response = await fetch('https://api.orhanaydogdu.com.tr/deprem/live.php?limit=5');
-            const data = await response.json();
-            const list = document.getElementById('earthquake-list');
-            list.innerHTML = '';
-            data.result.forEach((quake) => {
-                const item = document.createElement('li');
-                item.textContent = `${quake.lokasyon} - ${quake.mag} ML - ${quake.tarih}`;
-                list.appendChild(item);
-            });
-        }
-
-        document.getElementById('earthquakes-button').addEventListener('click', async function () {
-            await fetchEarthquakes();
-            document.getElementById('earthquake-popup').style.display = 'block';
-        });
-
-        document.getElementById('close-earthquake-popup').addEventListener('click', function () {
-            document.getElementById('earthquake-popup').style.display = 'none';
-        });
-
-        updateTime();
-    </script>
+    <script src="script.js"></script>
 </body>
-    </html>
+</html>
