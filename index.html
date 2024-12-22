@@ -9,14 +9,26 @@
     <style>
         body {
             display: flex;
-            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
             min-height: 100vh;
-            background-color: #f0f0f0;
-            padding: 10px;
+            margin: 0;
+            padding: 20px;
+            background-image: url('https://source.unsplash.com/random/1920x1080?nature');
+            background-size: cover;
+            background-position: center;
+            flex-wrap: nowrap;
+            flex-direction: row;
+        }
+
+        #time-container {
+            flex: 1;
+            text-align: center;
+            color: white;
         }
 
         #time {
-            font-size: 50px;
+            font-size: 60px;
             font-weight: bold;
         }
 
@@ -24,32 +36,34 @@
             color: red;
             font-size: 18px;
             font-weight: bold;
+            margin-top: 10px;
             display: none;
+        }
+
+        #menu-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
         }
 
         .menu-button {
             background-color: #444;
             color: white;
-            padding: 10px;
+            padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
             cursor: pointer;
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: center;
         }
 
         .menu-button:hover {
             background-color: #555;
         }
 
-        #settings-dropdown {
-            display: none;
-            flex-direction: column;
-            margin-top: 10px;
-        }
-
-        #weather-popup, #earthquake-popup {
+        #settings-dropdown, #weather-popup, #earthquake-popup {
             display: none;
             background-color: rgba(0, 0, 0, 0.8);
             color: white;
@@ -64,16 +78,46 @@
 
         #earthquake-list {
             list-style-type: none;
+            padding: 0;
+        }
+
+        #orientation-warning {
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: yellow;
+            color: black;
+            padding: 10px 20px;
+            border-radius: 8px;
+            z-index: 1000;
+        }
+
+        #cancel-alarm {
+            margin-top: 10px;
+            background-color: red;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div>
+    <!-- Yatay Uyarı -->
+    <div id="orientation-warning">Lütfen cihazınızı yatay moda çevirin!</div>
+
+    <!-- Saat -->
+    <div id="time-container">
         <p id="time"></p>
-        <p id="alarm-warning">Yaklaşan Alarm Var</p>
+        <p id="alarm-warning">Yaklaşan Alarm Var!</p>
+        <button id="cancel-alarm">Alarmı İptal Et</button>
     </div>
 
-    <div id="menu">
+    <!-- İşlem Menüsü -->
+    <div id="menu-container">
         <div id="weather-button" class="menu-button">
             <i class="fas fa-cloud-sun"></i> Hava Durumu
         </div>
@@ -87,19 +131,11 @@
         </div>
 
         <div id="settings-button" class="menu-button">
-            <span><i class="fas fa-cogs"></i> Ayarlar</span>
-            <i class="fas fa-chevron-down"></i>
-        </div>
-
-        <div id="settings-dropdown" class="menu-button">
-            <label for="language-select">Dil Seçimi:</label>
-            <select id="language-select" class="bg-gray-800 text-white px-4 py-2 rounded">
-                <option value="tr">Türkçe</option>
-                <option value="en">English</option>
-            </select>
+            <i class="fas fa-cog"></i> Ayarlar
         </div>
     </div>
 
+    <!-- Popup'lar -->
     <div id="weather-popup">
         <h3>Diyarbakır Hava Durumu</h3>
         <a href="https://weather.com/weather/today/l/37.9075,40.0742" target="_blank" class="text-blue-400 underline">
@@ -116,6 +152,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             let alarms = [];
             const alarmSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_c3865fa579.mp3');
+            let orientationWarning = document.getElementById('orientation-warning');
 
             function updateTime() {
                 const now = new Date();
@@ -134,8 +171,10 @@
                     const diff = alarmTime - now;
                     if (diff <= 60000 && diff > 0) {
                         document.getElementById('alarm-warning').style.display = 'block';
+                        document.getElementById('cancel-alarm').style.display = 'inline-block';
                     } else {
                         document.getElementById('alarm-warning').style.display = 'none';
+                        document.getElementById('cancel-alarm').style.display = 'none';
                     }
 
                     if (alarmTime <= now && !alarm.triggered) {
@@ -149,38 +188,42 @@
 
             document.getElementById('alarm-button').addEventListener('click', function () {
                 const alarmTime = prompt("Alarm saatini (HH:MM) formatında girin:");
-                const alarmDay = prompt("Alarm için gün seçin (örnek: Pazartesi, Salı):");
-                if (alarmTime && alarmDay) {
+                if (alarmTime) {
                     const [hours, minutes] = alarmTime.split(':').map(Number);
-                    alarms.push({ hours, minutes, day: alarmDay, triggered: false });
-                    alert(`Alarm kuruldu: ${alarmDay} günü, saat ${hours}:${minutes}`);
+                    alarms.push({ hours, minutes, triggered: false });
+                    alert(`Alarm kuruldu: ${hours}:${minutes}`);
                 }
             });
 
-            document.getElementById('settings-button').addEventListener('click', function () {
-                const dropdown = document.getElementById('settings-dropdown');
-                dropdown.style.display = dropdown.style.display === 'none' ? 'flex' : 'none';
+            document.getElementById('cancel-alarm').addEventListener('click', function () {
+                alarms = [];
+                document.getElementById('alarm-warning').style.display = 'none';
+                document.getElementById('cancel-alarm').style.display = 'none';
             });
 
+            // Hava durumu popup
             document.getElementById('weather-button').addEventListener('click', function () {
-                document.getElementById('weather-popup').style.display = 'block';
+                const popup = document.getElementById('weather-popup');
+                popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
             });
 
+            // Depremler popup
             document.getElementById('earthquakes-button').addEventListener('click', function () {
-                fetch('https://api.orhanaydogdu.com.tr/deprem/kandilli/live')
-                    .then(response => response.json())
-                    .then(data => {
-                        let latestEarthquakes = data.result.slice(0, 5);
-                        const earthquakeList = document.getElementById('earthquake-list');
-                        earthquakeList.innerHTML = '';
-                        latestEarthquakes.forEach(quake => {
-                            const li = document.createElement('li');
-                            li.textContent = `${quake.date} - Büyüklük: ${quake.mag} - Yer: ${quake.title}`;
-                            earthquakeList.appendChild(li);
-                        });
-                        document.getElementById('earthquake-popup').style.display = 'block';
-                    });
+                const popup = document.getElementById('earthquake-popup');
+                popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
             });
+
+            // Yatay mod kontrolü
+            function checkOrientation() {
+                if (window.innerWidth < window.innerHeight) {
+                    orientationWarning.style.display = 'block';
+                } else {
+                    orientationWarning.style.display = 'none';
+                }
+            }
+
+            window.addEventListener('resize', checkOrientation);
+            checkOrientation();
 
             setInterval(updateTime, 1000);
         });
