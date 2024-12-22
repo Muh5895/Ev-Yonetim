@@ -9,14 +9,15 @@
     <style>
         body {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
             min-height: 100vh;
             background-image: url('https://source.unsplash.com/1920x1080/?nature,sky');
             background-size: cover;
             background-position: center;
-            color: white;
             margin: 0;
-            padding: 0;
+            padding: 20px;
         }
         #left-content, #right-menu {
             flex: 1;
@@ -24,10 +25,12 @@
         #left-content {
             text-align: left;
             padding: 20px;
+            color: black;
         }
         #time {
             font-size: 48px;
             font-weight: bold;
+            color: black;
         }
         #right-menu {
             text-align: right;
@@ -52,7 +55,7 @@
             padding: 20px;
             border-radius: 8px;
             position: fixed;
-            top: 10%;
+            top: 20%;
             left: 50%;
             transform: translate(-50%);
             z-index: 1000;
@@ -69,17 +72,52 @@
             right: 0;
             z-index: 1000;
         }
+        #landscape-warning {
+            display: none;
+            background-color: orange;
+            color: black;
+            padding: 15px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        #alarm-popup {
+            display: none;
+            position: fixed;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%);
+            background-color: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 1000;
+        }
+        #earthquake-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            color: white;
+        }
+        #earthquake-list li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
+    <div id="landscape-warning">Lütfen cihazınızı yatay moda alın!</div>
     <div id="internet-warning">İnternet bağlantısı yok!</div>
+    
     <div id="left-content">
         <p id="time-label">Saat: </p>
         <p id="time"></p>
-        <p id="alarm-popup" class="popup">
-            Alarm Çalıyor!
-            <button id="stop-alarm" class="menu-button">Durdur</button>
-        </p>
     </div>
     <div id="right-menu">
         <div id="weather-button" class="menu-button"><i class="fas fa-cloud-sun"></i> Hava Durumu</div>
@@ -95,6 +133,17 @@
         </div>
     </div>
 
+    <div id="alarm-popup">
+        <p>Alarm Çalıyor!</p>
+        <button id="stop-alarm" class="menu-button">Durdur</button>
+    </div>
+
+    <div id="earthquake-popup" class="popup">
+        <h2>Son 5 Deprem</h2>
+        <ul id="earthquake-list"></ul>
+        <button id="close-earthquake-popup" class="menu-button">Kapat</button>
+    </div>
+
     <script>
         // Saat güncelleme
         function updateTime() {
@@ -104,6 +153,17 @@
             document.getElementById('time').textContent = `${hours}:${minutes}`;
         }
         setInterval(updateTime, 1000);
+
+        // Yatay mod kontrolü
+        function checkOrientation() {
+            if (window.innerWidth < window.innerHeight) {
+                document.getElementById('landscape-warning').style.display = 'block';
+            } else {
+                document.getElementById('landscape-warning').style.display = 'none';
+            }
+        }
+        window.addEventListener('resize', checkOrientation);
+        checkOrientation();
 
         // İnternet kontrolü
         function checkInternet() {
@@ -115,60 +175,29 @@
         }
         setInterval(checkInternet, 1000);
 
-        // Alarm kurulumu
-        let alarms = [];
-        document.getElementById('alarm-button').addEventListener('click', function () {
-            const time = prompt("Alarm saatini (HH:MM) formatında girin:");
-            if (time) {
-                const [hours, minutes] = time.split(':').map(Number);
-                alarms.push({ hours, minutes });
-                alert("Alarm kuruldu!");
-            }
-        });
-
-        // Alarm kontrolü
-        function checkAlarms() {
-            const now = new Date();
-            alarms.forEach((alarm, index) => {
-                if (
-                    alarm.hours === now.getHours() &&
-                    alarm.minutes === now.getMinutes()
-                ) {
-                    alarms.splice(index, 1);
-                    showAlarmPopup();
-                }
+        // Depremleri Getir
+        async function fetchEarthquakes() {
+            const response = await fetch('https://api.orhanaydogdu.com.tr/deprem/live.php?limit=5');
+            const data = await response.json();
+            const list = document.getElementById('earthquake-list');
+            list.innerHTML = '';
+            data.result.forEach((quake) => {
+                const item = document.createElement('li');
+                item.textContent = `${quake.lokasyon} - ${quake.mag} ML - ${quake.tarih}`;
+                list.appendChild(item);
             });
         }
-        setInterval(checkAlarms, 1000);
 
-        // Alarm Pop-Up Gösterme
-        function showAlarmPopup() {
-            const popup = document.getElementById('alarm-popup');
-            popup.style.display = 'block';
-
-            const sound = new Audio('https://pixabay.com/sound-effects/cyber-alarms-synthesized-116358/');
-            sound.play();
-            if (navigator.vibrate) navigator.vibrate([500, 500, 500]);
-        }
-
-        // Alarm durdurma
-        document.getElementById('stop-alarm').addEventListener('click', function () {
-            const popup = document.getElementById('alarm-popup');
-            popup.style.display = 'none';
+        document.getElementById('earthquakes-button').addEventListener('click', async function () {
+            await fetchEarthquakes();
+            document.getElementById('earthquake-popup').style.display = 'block';
         });
 
-        // Çeviri
-        document.getElementById('settings-button').addEventListener('click', function () {
-            const popup = document.getElementById('settings-popup');
-            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // Depremler butonu
-        document.getElementById('earthquakes-button').addEventListener('click', function () {
-            alert("Son 5 deprem bilgisi yüklenecek!");
+        document.getElementById('close-earthquake-popup').addEventListener('click', function () {
+            document.getElementById('earthquake-popup').style.display = 'none';
         });
 
         updateTime();
     </script>
 </body>
-</html>
+    </html>
