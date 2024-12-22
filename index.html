@@ -4,20 +4,146 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ev Asistanı</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Genel Tarz */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f4f4f4;
+        }
+
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            background: #0077cc;
+            color: white;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #clock {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #weather, #internet-status {
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .right-panel {
+            flex: 2;
+            padding: 20px;
+        }
+
+        #features button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            background: #0077cc;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #features button:hover {
+            background: #005999;
+        }
+
+        #popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #popup-content {
+            background: white;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #popup-content button#close-popup {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #popup-body {
+            padding: 20px;
+        }
+
+        .todo-item, .shopping-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+        }
+
+        .todo-item span, .shopping-item span {
+            flex: 1;
+        }
+    </style>
 </head>
 <body>
-    <div id="orientation-warning">Lütfen cihazınızı yatay moda çevirin.</div>
     <div class="container">
         <div class="left-panel">
             <div id="clock"></div>
             <div id="weather"></div>
+            <div id="internet-status"></div>
         </div>
         <div class="right-panel">
             <div id="features">
                 <button id="toDoButton">Yapılacaklar</button>
                 <button id="shoppingButton">Alışveriş Listesi</button>
                 <button id="notesButton">Notlar</button>
+                <button id="voiceButton">Sesli Komut</button>
+                <button id="securityButton">Güvenlik</button>
+                <button id="timerButton">Zamanlayıcı</button>
             </div>
         </div>
     </div>
@@ -30,6 +156,92 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Saat Fonksiyonu
+            const clock = document.getElementById('clock');
+            setInterval(() => {
+                const now = new Date();
+                clock.textContent = now.toLocaleTimeString();
+            }, 1000);
+
+            // Hava Durumu
+            const weatherElement = document.getElementById('weather');
+            async function fetchWeather() {
+                try {
+                    const response = await fetch(
+                        'https://api.openweathermap.org/data/2.5/weather?q=Diyarbakir&units=metric&lang=tr&appid=YOUR_API_KEY'
+                    );
+                    const data = await response.json();
+                    weatherElement.innerHTML = `
+                        <h3>Diyarbakır Hava Durumu</h3>
+                        <p>${data.weather[0].description}</p>
+                        <p>${data.main.temp}°C</p>
+                    `;
+                } catch (error) {
+                    weatherElement.innerHTML = `<p>Hava durumu alınamadı.</p>`;
+                }
+            }
+            fetchWeather();
+
+            // İnternet Kontrolü
+            const internetStatus = document.getElementById('internet-status');
+            function checkInternet() {
+                if (navigator.onLine) {
+                    internetStatus.textContent = '';
+                } else {
+                    internetStatus.textContent = 'İnternet bağlantısı yok!';
+                }
+            }
+            window.addEventListener('online', checkInternet);
+            window.addEventListener('offline', checkInternet);
+            checkInternet();
+
+            // Pop-up Kontrolleri
+            const popup = document.getElementById('popup');
+            const popupBody = document.getElementById('popup-body');
+            const closePopup = document.getElementById('close-popup');
+            closePopup.onclick = () => {
+                popup.classList.add('hidden');
+            };
+
+            function showPopup(content) {
+                popupBody.innerHTML = content;
+                popup.classList.remove('hidden');
+            }
+
+            // Butonlar ve Özellikler
+            const features = {
+                toDoButton: `
+                    <h2>Yapılacaklar Listesi</h2>
+                    <ul id="todo-list"></ul>
+                    <input type="text" id="todo-input" placeholder="Yeni görev ekle">
+                    <button id="add-todo">Ekle</button>
+                `,
+                shoppingButton: `
+                    <h2>Alışveriş Listesi</h2>
+                    <ul id="shopping-list"></ul>
+                    <input type="text" id="shopping-input" placeholder="Ürün ekle">
+                    <button id="add-shopping">Ekle</button>
+                `,
+                notesButton: `
+                    <h2>Notlar</h2>
+                    <textarea id="notes-area" placeholder="Notlarınızı buraya yazın..."></textarea>
+                `,
+                voiceButton: `<h2>Sesli Komut</h2><p>Bu özellik geliştiriliyor.</p>`,
+                securityButton: `<h2>Güvenlik Paneli</h2><p>Bu özellik geliştiriliyor.</p>`,
+                timerButton: `
+                    <h2>Zamanlayıcı</h2>
+                    <input type="number" id="timer-input" placeholder="Süre (saniye)">
+                    <button id="start-timer">Başlat</button>
+                    <div id="timer-display"></div>
+                `,
+            };
+
+            for (const id in features) {
+                document.getElementById(id).onclick = () => showPopup(features[id]);
+            }
+        });
+    </script>
 </body>
 </html>
