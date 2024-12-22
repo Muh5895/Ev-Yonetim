@@ -9,224 +9,166 @@
     <style>
         body {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            background-image: url('https://source.unsplash.com/random/1920x1080?nature');
+            background-image: url('https://source.unsplash.com/1920x1080/?nature,sky');
             background-size: cover;
             background-position: center;
-            flex-wrap: nowrap;
-            flex-direction: row;
-        }
-
-        #time-container {
-            flex: 1;
-            text-align: center;
             color: white;
+            margin: 0;
+            padding: 0;
         }
-
-        #time {
-            font-size: 60px;
-            font-weight: bold;
-        }
-
-        #alarm-warning {
-            color: red;
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 10px;
-            display: none;
-        }
-
-        #menu-container {
+        #left-content, #right-menu {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
         }
-
+        #left-content {
+            text-align: left;
+            padding: 20px;
+        }
+        #time {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        #right-menu {
+            text-align: right;
+            padding: 20px;
+        }
         .menu-button {
-            background-color: #444;
+            background-color: rgba(0, 0, 0, 0.6);
             color: white;
             padding: 15px;
+            margin: 10px 0;
             border-radius: 8px;
-            margin-bottom: 15px;
             cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            text-align: center;
         }
-
         .menu-button:hover {
-            background-color: #555;
-        }
-
-        #settings-dropdown, #weather-popup, #earthquake-popup {
-            display: none;
             background-color: rgba(0, 0, 0, 0.8);
+        }
+        .popup {
+            display: none;
+            background-color: rgba(0, 0, 0, 0.9);
             color: white;
             padding: 20px;
             border-radius: 8px;
             position: fixed;
-            top: 30%;
+            top: 10%;
             left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-        }
-
-        #earthquake-list {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        #orientation-warning {
-            display: none;
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: yellow;
-            color: black;
-            padding: 10px 20px;
-            border-radius: 8px;
+            transform: translate(-50%);
             z-index: 1000;
         }
-
-        #cancel-alarm {
-            margin-top: 10px;
+        #internet-warning {
+            display: none;
             background-color: red;
             color: white;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            display: none;
+            padding: 15px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
-    <!-- Yatay Uyarı -->
-    <div id="orientation-warning">Lütfen cihazınızı yatay moda çevirin!</div>
-
-    <!-- Saat -->
-    <div id="time-container">
+    <div id="internet-warning">İnternet bağlantısı yok!</div>
+    <div id="left-content">
+        <p id="time-label">Saat: </p>
         <p id="time"></p>
-        <p id="alarm-warning">Yaklaşan Alarm Var!</p>
-        <button id="cancel-alarm">Alarmı İptal Et</button>
+        <p id="alarm-popup" class="popup">
+            Alarm Çalıyor!
+            <button id="stop-alarm" class="menu-button">Durdur</button>
+        </p>
     </div>
-
-    <!-- İşlem Menüsü -->
-    <div id="menu-container">
-        <div id="weather-button" class="menu-button">
-            <i class="fas fa-cloud-sun"></i> Hava Durumu
+    <div id="right-menu">
+        <div id="weather-button" class="menu-button"><i class="fas fa-cloud-sun"></i> Hava Durumu</div>
+        <div id="earthquakes-button" class="menu-button"><i class="fas fa-warehouse"></i> Depremler</div>
+        <div id="alarm-button" class="menu-button"><i class="fas fa-bell"></i> Alarm Kur</div>
+        <div id="settings-button" class="menu-button"><i class="fas fa-cogs"></i> Ayarlar</div>
+        <div id="settings-popup" class="popup">
+            <label for="language-select">Dil:</label>
+            <select id="language-select">
+                <option value="tr">Türkçe</option>
+                <option value="en">English</option>
+            </select>
         </div>
-
-        <div id="earthquakes-button" class="menu-button">
-            <i class="fas fa-warehouse"></i> Depremler
-        </div>
-
-        <div id="alarm-button" class="menu-button">
-            <i class="fas fa-bell"></i> Alarm Kur
-        </div>
-
-        <div id="settings-button" class="menu-button">
-            <i class="fas fa-cog"></i> Ayarlar
-        </div>
-    </div>
-
-    <!-- Popup'lar -->
-    <div id="weather-popup">
-        <h3>Diyarbakır Hava Durumu</h3>
-        <a href="https://weather.com/weather/today/l/37.9075,40.0742" target="_blank" class="text-blue-400 underline">
-            Hava Durumunu Gör
-        </a>
-    </div>
-
-    <div id="earthquake-popup">
-        <h3>Son 5 Deprem:</h3>
-        <ul id="earthquake-list"></ul>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            let alarms = [];
-            const alarmSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_c3865fa579.mp3');
-            let orientationWarning = document.getElementById('orientation-warning');
+        // Saat güncelleme
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('time').textContent = `${hours}:${minutes}`;
+        }
+        setInterval(updateTime, 1000);
 
-            function updateTime() {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-                document.getElementById('time').textContent = `${hours}:${minutes}:${seconds}`;
-                checkAlarms(now);
+        // İnternet kontrolü
+        function checkInternet() {
+            if (!navigator.onLine) {
+                document.getElementById('internet-warning').style.display = 'block';
+            } else {
+                document.getElementById('internet-warning').style.display = 'none';
             }
+        }
+        setInterval(checkInternet, 1000);
 
-            function checkAlarms(now) {
-                alarms.forEach(alarm => {
-                    const alarmTime = new Date();
-                    alarmTime.setHours(alarm.hours, alarm.minutes, 0, 0);
-
-                    const diff = alarmTime - now;
-                    if (diff <= 60000 && diff > 0) {
-                        document.getElementById('alarm-warning').style.display = 'block';
-                        document.getElementById('cancel-alarm').style.display = 'inline-block';
-                    } else {
-                        document.getElementById('alarm-warning').style.display = 'none';
-                        document.getElementById('cancel-alarm').style.display = 'none';
-                    }
-
-                    if (alarmTime <= now && !alarm.triggered) {
-                        alarm.triggered = true;
-                        alarmSound.play();
-                        if (navigator.vibrate) navigator.vibrate([500, 500, 500]);
-                        alert('Alarm Çalıyor!');
-                    }
-                });
+        // Alarm kurulumu
+        let alarms = [];
+        document.getElementById('alarm-button').addEventListener('click', function () {
+            const time = prompt("Alarm saatini (HH:MM) formatında girin:");
+            if (time) {
+                const [hours, minutes] = time.split(':').map(Number);
+                alarms.push({ hours, minutes });
+                alert("Alarm kuruldu!");
             }
-
-            document.getElementById('alarm-button').addEventListener('click', function () {
-                const alarmTime = prompt("Alarm saatini (HH:MM) formatında girin:");
-                if (alarmTime) {
-                    const [hours, minutes] = alarmTime.split(':').map(Number);
-                    alarms.push({ hours, minutes, triggered: false });
-                    alert(`Alarm kuruldu: ${hours}:${minutes}`);
-                }
-            });
-
-            document.getElementById('cancel-alarm').addEventListener('click', function () {
-                alarms = [];
-                document.getElementById('alarm-warning').style.display = 'none';
-                document.getElementById('cancel-alarm').style.display = 'none';
-            });
-
-            // Hava durumu popup
-            document.getElementById('weather-button').addEventListener('click', function () {
-                const popup = document.getElementById('weather-popup');
-                popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
-            });
-
-            // Depremler popup
-            document.getElementById('earthquakes-button').addEventListener('click', function () {
-                const popup = document.getElementById('earthquake-popup');
-                popup.style.display = popup.style.display === 'none' ? 'block' : 'none';
-            });
-
-            // Yatay mod kontrolü
-            function checkOrientation() {
-                if (window.innerWidth < window.innerHeight) {
-                    orientationWarning.style.display = 'block';
-                } else {
-                    orientationWarning.style.display = 'none';
-                }
-            }
-
-            window.addEventListener('resize', checkOrientation);
-            checkOrientation();
-
-            setInterval(updateTime, 1000);
         });
+
+        // Alarm kontrolü
+        function checkAlarms() {
+            const now = new Date();
+            alarms.forEach((alarm, index) => {
+                if (
+                    alarm.hours === now.getHours() &&
+                    alarm.minutes === now.getMinutes()
+                ) {
+                    alarms.splice(index, 1);
+                    showAlarmPopup();
+                }
+            });
+        }
+        setInterval(checkAlarms, 1000);
+
+        // Alarm Pop-Up Gösterme
+        function showAlarmPopup() {
+            const popup = document.getElementById('alarm-popup');
+            popup.style.display = 'block';
+
+            const sound = new Audio('https://pixabay.com/sound-effects/cyber-alarms-synthesized-116358/');
+            sound.play();
+            if (navigator.vibrate) navigator.vibrate([500, 500, 500]);
+        }
+
+        // Alarm durdurma
+        document.getElementById('stop-alarm').addEventListener('click', function () {
+            const popup = document.getElementById('alarm-popup');
+            popup.style.display = 'none';
+        });
+
+        // Çeviri
+        document.getElementById('settings-button').addEventListener('click', function () {
+            const popup = document.getElementById('settings-popup');
+            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Depremler butonu
+        document.getElementById('earthquakes-button').addEventListener('click', function () {
+            alert("Son 5 deprem bilgisi yüklenecek!");
+        });
+
+        updateTime();
     </script>
 </body>
 </html>
