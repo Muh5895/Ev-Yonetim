@@ -25,59 +25,24 @@
             // Set Istanbul time
             function updateTime() {
                 const now = new Date();
-                const options = { timeZone: 'Europe/Diyarbakir', hour: '2-digit', minute: '2-digit' };
+                const options = { timeZone: 'Europe/Istanbul', hour: '2-digit', minute: '2-digit' };
                 const timeString = now.toLocaleTimeString('en-GB', options);
                 currentTime.textContent = timeString;
             }
             updateTime();
             setInterval(updateTime, 60000);
-          // İnternet Kontrol
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>İnternet Yok Uyarısı</title>
-    <style>
-        /* Anahtar CSS */
-        #internet-status {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #ff4d4d; /* Kırmızı renk */
-            color: white;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-size: 16px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-            display: none; /* Varsayılan olarak gizli */
-            z-index: 1000;
-        }
-    </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const internetStatus = document.getElementById('internet-status');
 
-            // İnternet bağlantı durumunu kontrol et
+            // Check internet connection
             function updateInternetStatus() {
                 if (navigator.onLine) {
-                    internetStatus.style.display = 'none'; // Bağlantı varsa gizle
+                    internetStatus.classList.add('hidden');
                 } else {
-                    internetStatus.style.display = 'block'; // Bağlantı yoksa göster
+                    internetStatus.classList.remove('hidden');
                 }
             }
-
-            // İlk kontrol
             updateInternetStatus();
-
-            // Bağlantı durumunda değişiklikleri dinle
             window.addEventListener('online', updateInternetStatus);
             window.addEventListener('offline', updateInternetStatus);
-        });
-    </script>
-</head>
-<body>
-    <!-- İnternet yok uyarısı -->
-    <div id="internet-status">İnternet Bağlantısı Yok</div>
-</body>
 
             // Toggle repeat
             repeatButton.addEventListener('click', function () {
@@ -173,6 +138,7 @@
     <div class="relative w-80 h-80 bg-black rounded-3xl overflow-hidden mb-4">
         <img alt="Tropical beach background" class="absolute inset-0 w-full h-full object-cover opacity-70" height="320" src="https://storage.googleapis.com/a1aa/image/KmbPeMWBBgWgEKqPm2yOBIHutT8IgGQ5drfJky5RRxSPrf6nA.jpg" width="320"/>
         <div class="absolute inset-0 flex flex-col items-center justify-center text-white">
+            <div class="absolute top-4 left-4 text-sm">Yerel müzik</div>
             <div class="absolute top-4 right-4 text-sm" id="current-time"></div>
             <div class="text-center mt-16">
                 <div class="text-xl font-bold" id="song-title">Çalan müzik yok</div>
