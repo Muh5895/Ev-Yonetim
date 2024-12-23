@@ -1,216 +1,227 @@
-<!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Müzik Çalar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const repeatButton = document.getElementById('repeat-button');
+            const volumeButton = document.getElementById('volume-button');
+            const addButton = document.getElementById('add-button');
+            const currentTime = document.getElementById('current-time');
+            const songTitle = document.getElementById('song-title');
+            const volumePopup = document.getElementById('volume-popup');
+            const fileInput = document.getElementById('file-input');
+            const playlist = document.getElementById('playlist');
+            const playPauseButton = document.getElementById('play-pause-button');
+            const audioPlayer = document.getElementById('audio-player');
+            const internetStatus = document.getElementById('internet-status');
+            const progressBar = document.getElementById('progress-bar');
+            const volumeControl = document.getElementById('volume-control');
+            let isPlaying = false;
+
+            // Set Istanbul time
+            function updateTime() {
+                const now = new Date();
+                const options = { timeZone: 'Europe/Diyarbakir', hour: '2-digit', minute: '2-digit' };
+                const timeString = now.toLocaleTimeString('en-GB', options);
+                currentTime.textContent = timeString;
+            }
+            updateTime();
+            setInterval(updateTime, 60000);
+          // İnternet Kontrol
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ev Asistanı</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <title>İnternet Yok Uyarısı</title>
     <style>
-        body {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: flex-start;
-            min-height: 100vh;
-            background-image: url('https://source.unsplash.com/1920x1080/?nature,sky');
-            background-size: cover;
-            background-position: center;
-            margin: 0;
-            padding: 20px;
-        }
-        #left-content, #right-menu {
-            flex: 1;
-        }
-        #left-content {
-            text-align: left;
-            padding: 20px;
-            color: black;
-        }
-        #time {
-            font-size: 48px;
-            font-weight: bold;
-            color: black;
-        }
-        #right-menu {
-            text-align: right;
-            padding: 20px;
-        }
-        .menu-button {
-            background-color: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-        }
-        .menu-button:hover {
-            background-color: rgba(0, 0, 0, 0.8);
-        }
-        .popup {
-            display: none;
-            background-color: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
+        /* Anahtar CSS */
+        #internet-status {
             position: fixed;
-            top: 20%;
+            top: 20px;
             left: 50%;
-            transform: translate(-50%);
-            z-index: 1000;
-        }
-        #internet-warning {
-            display: none;
-            background-color: red;
+            transform: translateX(-50%);
+            background-color: #ff4d4d; /* Kırmızı renk */
             color: white;
-            padding: 15px;
-            text-align: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
-        #landscape-warning {
-            display: none;
-            background-color: orange;
-            color: black;
-            padding: 15px;
-            text-align: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
-        #alarm-popup {
-            display: none;
-            position: fixed;
-            top: 30%;
-            left: 50%;
-            transform: translate(-50%);
-            background-color: rgba(255, 0, 0, 0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+            display: none; /* Varsayılan olarak gizli */
             z-index: 1000;
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const internetStatus = document.getElementById('internet-status');
+
+            // İnternet bağlantı durumunu kontrol et
+            function updateInternetStatus() {
+                if (navigator.onLine) {
+                    internetStatus.style.display = 'none'; // Bağlantı varsa gizle
+                } else {
+                    internetStatus.style.display = 'block'; // Bağlantı yoksa göster
+                }
+            }
+
+            // İlk kontrol
+            updateInternetStatus();
+
+            // Bağlantı durumunda değişiklikleri dinle
+            window.addEventListener('online', updateInternetStatus);
+            window.addEventListener('offline', updateInternetStatus);
+        });
+    </script>
 </head>
 <body>
-    <div id="landscape-warning">Lütfen cihazınızı yatay moda alın!</div>
-    <div id="internet-warning">İnternet bağlantısı yok!</div>
-    
-    <div id="left-content">
-        <p id="time-label">Saat: </p>
-        <p id="time"></p>
+    <!-- İnternet yok uyarısı -->
+    <div id="internet-status">İnternet Bağlantısı Yok</div>
+</body>
+
+            // Toggle repeat
+            repeatButton.addEventListener('click', function () {
+                audioPlayer.loop = !audioPlayer.loop;
+                this.classList.toggle('text-green-500');
+            });
+
+            // Show volume control
+            volumeButton.addEventListener('click', function () {
+                volumePopup.classList.remove('hidden');
+            });
+
+            // Close volume control
+            document.getElementById('close-volume-popup').addEventListener('click', function () {
+                volumePopup.classList.add('hidden');
+            });
+
+            // Adjust volume
+            volumeControl.addEventListener('input', function () {
+                audioPlayer.volume = this.value / 100;
+            });
+
+            // Show file input
+            addButton.addEventListener('click', function () {
+                fileInput.click();
+            });
+
+            // Add music to playlist
+            fileInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer', 'hover:bg-gray-200', 'p-2');
+                    const songName = document.createElement('span');
+                    songName.textContent = file.name;
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+                    deleteButton.classList.add('text-red-500', 'ml-2');
+                    deleteButton.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        listItem.remove();
+                    });
+                    listItem.appendChild(songName);
+                    listItem.appendChild(deleteButton);
+                    listItem.addEventListener('click', function () {
+                        songTitle.textContent = file.name;
+                        audioPlayer.src = URL.createObjectURL(file);
+                        audioPlayer.play();
+                        isPlaying = true;
+                        playPauseButton.innerHTML = '<i class="fas fa-pause-circle"></i>';
+                    });
+                    playlist.appendChild(listItem);
+                }
+            });
+
+            // Play/Pause button
+            playPauseButton.addEventListener('click', function () {
+                if (isPlaying) {
+                    audioPlayer.pause();
+                    playPauseButton.innerHTML = '<i class="fas fa-play-circle"></i>';
+                } else {
+                    audioPlayer.play();
+                    playPauseButton.innerHTML = '<i class="fas fa-pause-circle"></i>';
+                }
+                isPlaying = !isPlaying;
+            });
+
+            // Update progress bar
+            audioPlayer.addEventListener('timeupdate', function () {
+                const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                progressBar.value = progress;
+            });
+
+            // Seek in the audio
+            progressBar.addEventListener('input', function () {
+                const seekTime = (progressBar.value / 100) * audioPlayer.duration;
+                audioPlayer.currentTime = seekTime;
+            });
+
+            // Clear playlist on page reload
+            function clearPlaylist() {
+                localStorage.removeItem('playlist');
+            }
+            clearPlaylist();
+        });
+    </script>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen bg-gray-200">
+    <div id="internet-status" class="absolute top-0 left-0 right-0 bg-red-500 text-white text-center p-2 hidden">
+        İnternet bağlantısı yok
     </div>
-    <div id="right-menu">
-        <div id="weather-button" class="menu-button"><i class="fas fa-cloud-sun"></i> Hava Durumu</div>
-        <div id="earthquakes-button" class="menu-button"><i class="fas fa-warehouse"></i> Depremler</div>
-        <div id="alarm-button" class="menu-button"><i class="fas fa-bell"></i> Alarm Kur</div>
-        <div id="settings-button" class="menu-button"><i class="fas fa-cogs"></i> Ayarlar</div>
-        <div id="settings-popup" class="popup">
-            <label for="language-select">Dil:</label>
-            <select id="language-select">
-                <option value="tr">Türkçe</option>
-                <option value="en">English</option>
-            </select>
+    <div class="relative w-80 h-80 bg-black rounded-3xl overflow-hidden mb-4">
+        <img alt="Tropical beach background" class="absolute inset-0 w-full h-full object-cover opacity-70" height="320" src="https://storage.googleapis.com/a1aa/image/KmbPeMWBBgWgEKqPm2yOBIHutT8IgGQ5drfJky5RRxSPrf6nA.jpg" width="320"/>
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-white">
+            <div class="absolute top-4 right-4 text-sm" id="current-time"></div>
+            <div class="text-center mt-16">
+                <div class="text-xl font-bold" id="song-title">Çalan müzik yok</div>
+            </div>
+            <div class="flex items-center justify-center mt-8">
+                <button class="text-3xl mx-4">
+                    <i class="fas fa-backward"></i>
+                </button>
+                <button class="text-5xl mx-4" id="play-pause-button">
+                    <i class="fas fa-play-circle"></i>
+                </button>
+                <button class="text-3xl mx-4">
+                    <i class="fas fa-forward"></i>
+                </button>
+            </div>
+            <div class="w-full mt-4 px-4">
+                <input type="range" id="progress-bar" class="w-full" min="0" max="100" value="0">
+            </div>
+            <div class="absolute bottom-4 left-4 text-xl">
+                <i class="fas fa-sync-alt" id="repeat-button"></i>
+            </div>
+            <div class="absolute bottom-4 right-4 text-xl">
+                <i class="fas fa-plus" id="add-button"></i>
+            </div>
+            <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-xl">
+                <i class="fas fa-volume-up" id="volume-button"></i>
+            </div>
         </div>
     </div>
 
-    <div id="alarm-popup">
-        <p>Alarm Çalıyor!</p>
-        <button id="stop-alarm" class="menu-button">Durdur</button>
+    <ul id="playlist" class="bg-white w-80 rounded-3xl p-4 list-none">
+        <!-- Playlist items will be added here -->
+    </ul>
+
+    <!-- Volume Popup -->
+    <div id="volume-popup" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-4 rounded-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold">Ses Düzeyi</h2>
+                <button id="close-volume-popup" class="text-red-500">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <input type="range" id="volume-control" class="w-full" min="0" max="100" value="50">
+        </div>
     </div>
 
-    <script>
-        // Saat güncelleme
-        function updateTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('time').textContent = `${hours}:${minutes}`;
-        }
-        setInterval(updateTime, 1000);
-
-        // Yatay mod kontrolü
-        function checkOrientation() {
-            if (window.innerWidth < window.innerHeight) {
-                document.getElementById('landscape-warning').style.display = 'block';
-            } else {
-                document.getElementById('landscape-warning').style.display = 'none';
-            }
-        }
-        window.addEventListener('resize', checkOrientation);
-        checkOrientation();
-
-        // İnternet kontrolü
-        function checkInternet() {
-            if (!navigator.onLine) {
-                document.getElementById('internet-warning').style.display = 'block';
-            } else {
-                document.getElementById('internet-warning').style.display = 'none';
-            }
-        }
-        setInterval(checkInternet, 1000);
-
-        // Alarm kurulumu
-        let alarms = [];
-        document.getElementById('alarm-button').addEventListener('click', function () {
-            const time = prompt("Alarm saatini (HH:MM) formatında girin:");
-            if (time) {
-                const [hours, minutes] = time.split(':').map(Number);
-                alarms.push({ hours, minutes });
-                alert("Alarm kuruldu!");
-            }
-        });
-
-        // Alarm kontrolü
-        function checkAlarms() {
-            const now = new Date();
-            alarms.forEach((alarm, index) => {
-                if (
-                    alarm.hours === now.getHours() &&
-                    alarm.minutes === now.getMinutes()
-                ) {
-                    alarms.splice(index, 1);
-                    showAlarmPopup();
-                }
-            });
-        }
-        setInterval(checkAlarms, 1000);
-
-        // Alarm Pop-Up Gösterme
-        function showAlarmPopup() {
-            const popup = document.getElementById('alarm-popup');
-            popup.style.display = 'block';
-
-            const sound = new Audio('https://pixabay.com/sound-effects/cyber-alarms-synthesized-116358/');
-            sound.play();
-            if (navigator.vibrate) navigator.vibrate([500, 500, 500]);
-        }
-
-        // Alarm durdurma
-        document.getElementById('stop-alarm').addEventListener('click', function () {
-            const popup = document.getElementById('alarm-popup');
-            popup.style.display = 'none';
-        });
-
-        // Çeviri
-        document.getElementById('settings-button').addEventListener('click', function () {
-            const popup = document.getElementById('settings-popup');
-            popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // Depremler butonu
-        document.getElementById('earthquakes-button').addEventListener('click', function () {
-            alert("Son 5 deprem bilgisi yüklenecek!");
-        });
-
-        updateTime();
-    </script>
+    <!-- Add Music Input -->
+    <input type="file" id="file-input" accept="audio/*" class="hidden"/>
+    <audio id="audio-player" class="hidden"></audio>
 </body>
 </html>
