@@ -1,27 +1,27 @@
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FunNote Yükleme Ekranı</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
-</head>
-<body class="bg-black text-white flex items-center justify-center min-h-screen">
-    <div class="text-center">
-        <h1 class="text-4xl font-bold mb-4">FunNote İndiriliyor</h1>
-        <p class="text-lg mb-6">İndirme işleminiz otomatik olarak başlayacaktır.</p>
-        <a href="FunNote.apk" download class="text-blue-500 underline">İndirme başlamazsa buraya tıklayın.</a>
-    </div>
-
-    <script>
-        window.onload = function() {
-            const link = document.createElement('a');
-            link.href = 'FunNote.apk';
-            link.download = 'file.zip';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    </script>
-</body>
+<html>
+ <head>
+  <title>
+   FunNote
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap" rel="stylesheet"/>
+ </head>
+ <body class="bg-black text-white font-roboto">
+  <div class="min-h-screen flex flex-col items-center justify-center">
+   <img alt="FunNote logo with a fun and colorful design" class="mb-8" height="200" src="https://lh3.googleusercontent.com/pw/AP1GczMoJi8Ke8bZjhXe3aTljpPm_NFz65mTbSyV-v31krEV84zejrpofHOBU7dX-qKizapBbeWhz_8J6BV62KYegsC-tAqDLr-fPh_iGvoiEtXf3DGZcNbeEn77NozJpCxtVsbP_SNSNp6XeZkKkgGFDFv-=w500-h500-s-no-gm?authuser=0" width="200"/>
+   <h1 class="text-4xl font-bold mb-4">
+    FunNote
+   </h1>
+   <p class="text-lg mb-8">
+    FunNote İle Notlarınızı Kolay, Hızlı ve Güvenli Bir Şekilde Kaydedebilirsiniz
+   </p>
+   <a class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" download="" href="FunNote.apk">
+    <i class="fas fa-download mr-2">
+    </i>
+    FunNote'u İndir
+   </a>
+  </div>
+ </body>
 </html>
