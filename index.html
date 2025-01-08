@@ -1,124 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telefon Ayarları</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f4f4;
-        }
-        .header {
-            background-color: #222;
-            color: white;
-            padding: 10px;
-            text-align: center;
-        }
-        .menu {
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            margin: 0;
-        }
-        .menu-item {
-            list-style: none;
-            padding: 15px 20px;
-            border-bottom: 1px solid #ccc;
-            background-color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .menu-item:hover {
-            background-color: #f0f0f0;
-        }
-        .menu-item i {
-            color: gray;
-        }
-        .menu-item span {
-            font-size: 16px;
-        }
-        .content {
-            display: none;
-            padding: 20px;
-            background-color: white;
-        }
-        .content.active {
-            display: block;
-        }
-    </style>
+    <title>Otomatik Dosya İndirme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
 </head>
-<body>
-    <div class="header">
-        <h1>Ayarlar</h1>
-    </div>
-
-    <ul class="menu">
-        <li class="menu-item" onclick="showContent('personalInfo')">
-            <span>Kişisel Bilgiler</span>
-            <i>👤</i>
-        </li>
-        <li class="menu-item" onclick="showContent('notifications')">
-            <span>Bildirim</span>
-            <i>🔔</i>
-        </li>
-        <li class="menu-item" onclick="showContent('generalSettings')">
-            <span>Genel</span>
-            <i>⚙️</i>
-        </li>
-        <li class="menu-item" onclick="showContent('wifiSettings')">
-            <span>Wi-Fi</span>
-            <i>📶</i>
-        </li>
-        <li class="menu-item" onclick="showContent('bluetoothSettings')">
-            <span>Bluetooth</span>
-            <i>🔵</i>
-        </li>
-        <li class="menu-item" onclick="showContent('aboutPhone')">
-            <span>Telefon Hakkında</span>
-            <i>📱</i>
-        </li>
-    </ul>
-
-    <div id="personalInfo" class="content">
-        <h2>Kişisel Bilgiler</h2>
-        <p>Bu bölümde kişisel bilgilerinizi düzenleyebilirsiniz.</p>
-    </div>
-
-    <div id="notifications" class="content">
-        <h2>Bildirim Ayarları</h2>
-        <p>Bildirim tercihlerinizi buradan değiştirebilirsiniz.</p>
-    </div>
-
-    <div id="generalSettings" class="content">
-        <h2>Genel Ayarlar</h2>
-        <p>Telefonun genel ayarlarını buradan yapabilirsiniz.</p>
-    </div>
-
-    <div id="wifiSettings" class="content">
-        <h2>Wi-Fi Ayarları</h2>
-        <p>Wi-Fi ağlarını görüntüleyebilir ve bağlanabilirsiniz.</p>
-    </div>
-
-    <div id="bluetoothSettings" class="content">
-        <h2>Bluetooth Ayarları</h2>
-        <p>Bluetooth cihazlarını bağlamak için burayı kullanabilirsiniz.</p>
-    </div>
-
-    <div id="aboutPhone" class="content">
-        <h2>Telefon Hakkında</h2>
-        <p>Telefon modeli, yazılım sürümü ve diğer bilgiler burada bulunur.</p>
+<body class="bg-black text-white flex items-center justify-center min-h-screen">
+    <div class="text-center">
+        <h1 class="text-4xl font-bold mb-4">FunNote İndiriliyor</h1>
+        <p class="text-lg mb-6">İndirme işleminiz otomatik olarak başlayacaktır.</p>
+        <a href="path/to/your/file.zip" download class="text-blue-500 underline">İndirme başlamazsa buraya tıklayın.</a>
     </div>
 
     <script>
-        function showContent(id) {
-            const contents = document.querySelectorAll('.content');
-            contents.forEach(content => content.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+        window.onload = function() {
+            const link = document.createElement('a');
+            link.href = 'path/to/your/file.zip';
+            link.download = 'file.zip';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
