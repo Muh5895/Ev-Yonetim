@@ -10,13 +10,13 @@
     <div class="text-center">
         <h1 class="text-4xl font-bold mb-4">FunNote İndiriliyor</h1>
         <p class="text-lg mb-6">İndirme işleminiz otomatik olarak başlayacaktır.</p>
-        <a href="path/to/your/file.zip" download class="text-blue-500 underline">İndirme başlamazsa buraya tıklayın.</a>
+        <a href="FunNote.apk" download class="text-blue-500 underline">İndirme başlamazsa buraya tıklayın.</a>
     </div>
 
     <script>
         window.onload = function() {
             const link = document.createElement('a');
-            link.href = 'path/to/your/file.zip';
+            link.href = 'FunNote.apk';
             link.download = 'file.zip';
             document.body.appendChild(link);
             link.click();
